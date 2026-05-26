@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+.env
+*.egg-info/
+dist/
+build/
+.coverage
+coverage.xml
+*.log
+bandit-report.*
+pip-audit-report.*
+ruff-report.*
+
+# Node
+frontend/node_modules/
+frontend/dist/
+frontend/npm-audit-report.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo

@@ -1,0 +1,65 @@
+name: Code Quality
+
+on:
+  schedule:
+    - cron: '0 12 * * 0'  # Weekly Sunday noon UTC
+  workflow_dispatch:
+
+jobs:
+  code-quality:
+    name: Run Code Quality Analysis
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read last checked commit
+        id: last_commit
+        run: |
+          if [ -f .github/.last_commit ]; then
+            echo "last=$(cat .github/.last_commit)" >> $GITHUB_ENV
+          fi
+
+      - name: Get current commit
+        run: echo "CURRENT_COMMIT=$(git rev-parse HEAD)" >> $GITHUB_ENV
+
+      - name: Check for new commits
+        run: |
+          if [ "$CURRENT_COMMIT" = "${{ env.last }}" ]; then
+            echo "skip=true" >> $GITHUB_ENV
+          else
+            echo "skip=false" >> $GITHUB_ENV
+          fi
+
+      - name: Set up Python 3.11
+        if: env.skip != 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install quality tools
+        if: env.skip != 'true'
+        run: pip install bandit ruff
+
+      - name: Run Bandit
+        if: env.skip != 'true'
+        run: bandit -r api scripts -o bandit-report.txt -f txt || true
+
+      - name: Run Ruff
+        if: env.skip != 'true'
+        run: ruff check . > ruff-report.txt || true
+
+      - name: Upload reports
+        if: env.skip != 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: code-quality-reports
+          path: |
+            bandit-report.txt
+            ruff-report.txt
+
+      - name: Save commit hash
+        if: env.skip != 'true'
+        run: |
+          mkdir -p .github
+          echo "$CURRENT_COMMIT" > .github/.last_commit

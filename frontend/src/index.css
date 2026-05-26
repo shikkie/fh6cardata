@@ -1,0 +1,123 @@
+:root {
+  --fh6-accent: #f0a500;
+  --fh6-bg: #0d0d0d;
+  --fh6-surface: #1a1a1a;
+  --fh6-surface2: #242424;
+  --fh6-text: #f5f5f5;
+  --fh6-muted: #888;
+  --rarity-common: #aaaaaa;
+  --rarity-rare: #5588ff;
+  --rarity-epic: #aa55ff;
+  --rarity-legendary: #ffaa00;
+  --rarity-forza: #ff4488;
+  --rarity-barn: #cc7722;
+}
+
+body {
+  background-color: var(--fh6-bg);
+  color: var(--fh6-text);
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  min-height: 100vh;
+}
+
+.navbar-fh6 {
+  background-color: var(--fh6-surface);
+  border-bottom: 2px solid var(--fh6-accent);
+}
+
+.navbar-fh6 .navbar-brand {
+  color: var(--fh6-accent);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.search-bar input,
+.search-bar select {
+  background-color: var(--fh6-surface2);
+  border: 1px solid #333;
+  color: var(--fh6-text);
+}
+
+.search-bar input:focus,
+.search-bar select:focus {
+  background-color: var(--fh6-surface2);
+  border-color: var(--fh6-accent);
+  color: var(--fh6-text);
+  box-shadow: 0 0 0 0.2rem rgba(240, 165, 0, 0.25);
+}
+
+.search-bar select option {
+  background-color: var(--fh6-surface2);
+}
+
+.car-card {
+  background-color: var(--fh6-surface);
+  border: 1px solid #2a2a2a;
+  border-radius: 8px;
+  transition: border-color 0.15s, transform 0.15s;
+}
+
+.car-card:hover {
+  border-color: var(--fh6-accent);
+  transform: translateY(-2px);
+}
+
+.class-badge {
+  font-weight: 700;
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background-color: #333;
+  color: var(--fh6-accent);
+  border: 1px solid var(--fh6-accent);
+}
+
+.rarity-badge {
+  font-size: 0.72rem;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.rarity-common    { background: #2a2a2a; color: var(--rarity-common); }
+.rarity-rare      { background: #0e1a3a; color: var(--rarity-rare); }
+.rarity-epic      { background: #1a0e2e; color: var(--rarity-epic); }
+.rarity-legendary { background: #2e1a00; color: var(--rarity-legendary); }
+.rarity-forza     { background: #2e0016; color: var(--rarity-forza); }
+.rarity-barn      { background: #1e0e00; color: var(--rarity-barn); }
+
+.base-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--fh6-accent);
+}
+
+.base-value.no-auction {
+  color: var(--fh6-muted);
+  font-style: italic;
+  font-size: 0.85rem;
+  font-weight: 400;
+}
+
+.spinner-fh6 {
+  border-top-color: var(--fh6-accent) !important;
+}
+
+.result-count {
+  color: var(--fh6-muted);
+  font-size: 0.85rem;
+}
+
+/* Sticky search bar on mobile */
+@media (max-width: 768px) {
+  .search-sticky {
+    position: sticky;
+    top: 56px;
+    z-index: 100;
+    background-color: var(--fh6-bg);
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #222;
+  }
+}
