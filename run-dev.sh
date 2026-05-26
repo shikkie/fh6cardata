@@ -30,7 +30,7 @@ API_PID_FILE=".api.pid"
 UI_PID_FILE=".ui.pid"
 
 # Ports (override via env)
-API_PORT="${FH6_API_PORT:-5000}"
+API_PORT="${FH6_API_PORT:-5002}"
 UI_PORT="${FH6_UI_PORT:-3002}"
 
 show_help() {
