@@ -15,6 +15,8 @@ CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 _cars: list[dict] | None = None
 
+CLASS_ORDER = ["D", "C", "B", "A", "S1", "S2", "R"]
+
 
 def load_cars() -> list[dict]:
     global _cars
@@ -33,11 +35,12 @@ def health():
 def list_cars():
     cars = load_cars()
 
-    q = request.args.get("q", "").strip().lower()
+    q            = request.args.get("q", "").strip().lower()
     manufacturer = request.args.get("manufacturer", "").strip().lower()
-    car_class = request.args.get("class", "").strip().upper()
-    car_type = request.args.get("type", "").strip().lower()
-    rarity = request.args.get("rarity", "").strip().lower()
+    pi_class     = request.args.get("class", "").strip().upper()
+    rarity       = request.args.get("rarity", "").strip().lower()
+    availability = request.args.get("availability", "").strip().lower()
+    auctionable  = request.args.get("auctionable", "").strip().lower()
 
     results = cars
 
@@ -50,12 +53,16 @@ def list_cars():
         ]
     if manufacturer:
         results = [c for c in results if c["manufacturer"].lower() == manufacturer]
-    if car_class:
-        results = [c for c in results if c["class"].upper() == car_class]
-    if car_type:
-        results = [c for c in results if car_type in c["type"].lower()]
+    if pi_class:
+        results = [c for c in results if (c.get("pi_class") or "").upper() == pi_class]
     if rarity:
         results = [c for c in results if c["rarity"].lower() == rarity]
+    if availability:
+        results = [c for c in results if availability in c.get("availability", "").lower()]
+    if auctionable in ("true", "1", "yes"):
+        results = [c for c in results if c.get("auctionable")]
+    elif auctionable in ("false", "0", "no"):
+        results = [c for c in results if not c.get("auctionable")]
 
     return jsonify(results)
 
@@ -73,15 +80,14 @@ def get_car(car_id: int):
 def list_filters():
     """Return distinct values for all filterable fields."""
     cars = load_cars()
-    class_order = ["D", "C", "B", "A", "S1", "S2", "X"]
     return jsonify({
         "manufacturers": sorted({c["manufacturer"] for c in cars}),
-        "classes": sorted(
-            {c["class"] for c in cars},
-            key=lambda x: class_order.index(x) if x in class_order else 99,
-        ),
-        "types": sorted({c["type"] for c in cars}),
+        "classes": [
+            c for c in CLASS_ORDER
+            if any(car.get("pi_class") == c for car in cars)
+        ],
         "rarities": sorted({c["rarity"] for c in cars}),
+        "availabilities": sorted({c.get("availability", "") for c in cars} - {""}),
     })
 
 

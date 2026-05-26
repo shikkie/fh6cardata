@@ -8,15 +8,15 @@ const API_BASE = '/api'
 
 function App() {
   const [cars, setCars] = useState([])
-  const [filters, setFilters] = useState({ manufacturers: [], classes: [], types: [], rarities: [] })
+  const [filters, setFilters] = useState({ manufacturers: [], classes: [], rarities: [], availabilities: [] })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
   const [query, setQuery] = useState('')
   const [selectedClass, setSelectedClass] = useState('')
-  const [selectedType, setSelectedType] = useState('')
   const [selectedRarity, setSelectedRarity] = useState('')
   const [selectedManufacturer, setSelectedManufacturer] = useState('')
+  const [selectedAvailability, setSelectedAvailability] = useState('')
 
   const debouncedQuery = useDebounce(query, 300)
 
@@ -34,23 +34,23 @@ function App() {
     if (debouncedQuery)        params.set('q', debouncedQuery)
     if (selectedManufacturer)  params.set('manufacturer', selectedManufacturer)
     if (selectedClass)         params.set('class', selectedClass)
-    if (selectedType)          params.set('type', selectedType)
     if (selectedRarity)        params.set('rarity', selectedRarity)
+    if (selectedAvailability)  params.set('availability', selectedAvailability)
 
     fetch(`${API_BASE}/cars?${params}`)
       .then(r => r.json())
       .then(data => { setCars(data); setLoading(false) })
       .catch(e => { setError(e.message); setLoading(false) })
-  }, [debouncedQuery, selectedManufacturer, selectedClass, selectedType, selectedRarity])
+  }, [debouncedQuery, selectedManufacturer, selectedClass, selectedRarity, selectedAvailability])
 
   useEffect(() => { fetchCars() }, [fetchCars])
 
   function clearFilters() {
     setQuery('')
     setSelectedClass('')
-    setSelectedType('')
     setSelectedRarity('')
     setSelectedManufacturer('')
+    setSelectedAvailability('')
   }
 
   return (
@@ -63,12 +63,12 @@ function App() {
             onQueryChange={setQuery}
             selectedClass={selectedClass}
             onClassChange={setSelectedClass}
-            selectedType={selectedType}
-            onTypeChange={setSelectedType}
             selectedRarity={selectedRarity}
             onRarityChange={setSelectedRarity}
             selectedManufacturer={selectedManufacturer}
             onManufacturerChange={setSelectedManufacturer}
+            selectedAvailability={selectedAvailability}
+            onAvailabilityChange={setSelectedAvailability}
             filters={filters}
             onClear={clearFilters}
           />

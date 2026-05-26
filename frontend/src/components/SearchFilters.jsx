@@ -1,13 +1,13 @@
 export default function SearchFilters({
   query, onQueryChange,
   selectedClass, onClassChange,
-  selectedType, onTypeChange,
   selectedRarity, onRarityChange,
   selectedManufacturer, onManufacturerChange,
+  selectedAvailability, onAvailabilityChange,
   filters,
   onClear,
 }) {
-  const hasFilters = query || selectedClass || selectedType || selectedRarity || selectedManufacturer
+  const hasFilters = query || selectedClass || selectedRarity || selectedManufacturer || selectedAvailability
 
   return (
     <div className="search-bar">
@@ -42,16 +42,16 @@ export default function SearchFilters({
         </div>
 
         <div className="col-6 col-sm-3 col-lg-2">
-          <select className="form-select form-select-sm" value={selectedType} onChange={e => onTypeChange(e.target.value)}>
-            <option value="">All Types</option>
-            {filters.types.map(t => <option key={t} value={t}>{t}</option>)}
+          <select className="form-select form-select-sm" value={selectedRarity} onChange={e => onRarityChange(e.target.value)}>
+            <option value="">All Rarities</option>
+            {filters.rarities.map(r => <option key={r} value={r}>{r}</option>)}
           </select>
         </div>
 
         <div className="col-6 col-sm-3 col-lg-2">
-          <select className="form-select form-select-sm" value={selectedRarity} onChange={e => onRarityChange(e.target.value)}>
-            <option value="">All Rarities</option>
-            {filters.rarities.map(r => <option key={r} value={r}>{r}</option>)}
+          <select className="form-select form-select-sm" value={selectedAvailability} onChange={e => onAvailabilityChange(e.target.value)}>
+            <option value="">All Availability</option>
+            {filters.availabilities && filters.availabilities.map(a => <option key={a} value={a}>{a}</option>)}
           </select>
         </div>
 

@@ -38,7 +38,7 @@ def test_filter_by_class(client):
     resp = client.get("/api/cars?class=S1")
     assert resp.status_code == 200
     cars = json.loads(resp.data)
-    assert all(c["class"] == "S1" for c in cars)
+    assert all(c["pi_class"] == "S1" for c in cars)
 
 
 def test_filter_by_rarity(client):
@@ -62,6 +62,13 @@ def test_search_query(client):
     assert any("Mustang" in c["full_name"] for c in cars)
 
 
+def test_filter_auctionable(client):
+    resp = client.get("/api/cars?auctionable=true")
+    assert resp.status_code == 200
+    cars = json.loads(resp.data)
+    assert all(c["auctionable"] for c in cars)
+
+
 def test_get_car_by_id(client):
     resp = client.get("/api/cars/1")
     assert resp.status_code == 200
@@ -80,8 +87,8 @@ def test_filters_endpoint(client):
     data = json.loads(resp.data)
     assert "manufacturers" in data
     assert "classes" in data
-    assert "types" in data
     assert "rarities" in data
+    assert "availabilities" in data
 
 
 def test_car_has_required_fields(client):
@@ -89,7 +96,7 @@ def test_car_has_required_fields(client):
     cars = json.loads(resp.data)
     required = {
         "id", "full_name", "manufacturer", "model",
-        "class", "pi", "type", "rarity", "base_value",
+        "pi_class", "pi", "rarity", "base_value", "auctionable",
     }
     for car in cars:
         missing = required - car.keys()
