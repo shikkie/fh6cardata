@@ -121,3 +121,57 @@ body {
     border-bottom: 1px solid #222;
   }
 }
+
+/* Car detail bottom-sheet / modal */
+.car-detail-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 1050;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+@media (min-width: 576px) {
+  .car-detail-backdrop {
+    align-items: center;
+  }
+}
+
+.car-detail-sheet {
+  background: var(--fh6-surface2);
+  border-radius: 16px 16px 0 0;
+  padding: 1.25rem;
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: slideUp 0.22s ease;
+}
+
+@media (min-width: 576px) {
+  .car-detail-sheet {
+    border-radius: 16px;
+    max-height: 80vh;
+  }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(40px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+.car-card {
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.car-card:hover,
+.car-card:focus-within {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(240, 165, 0, 0.2);
+}
+
+.rarity-treasure-car { color: var(--rarity-barn); }
+.rarity-unreleased    { color: var(--fh6-muted); }

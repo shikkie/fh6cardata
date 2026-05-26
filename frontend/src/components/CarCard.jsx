@@ -17,11 +17,11 @@ function formatCredits(val) {
   return val.toLocaleString('en-US') + ' CR'
 }
 
-export default function CarCard({ car }) {
+export default function CarCard({ car, onClick }) {
   const noAuction = !car.auctionable
 
   return (
-    <div className="car-card p-3 h-100">
+    <div className="car-card p-3 h-100" onClick={onClick} role="button" tabIndex={0} onKeyDown={e => e.key === 'Enter' && onClick?.()}>
       <div className="d-flex justify-content-between align-items-start mb-1">
         <div className="d-flex gap-1 flex-wrap">
           {car.pi_class && <span className="class-badge">{car.pi_class}</span>}

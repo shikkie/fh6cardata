@@ -1,6 +1,10 @@
+import { useState } from 'react'
 import CarCard from './CarCard.jsx'
+import CarDetail from './CarDetail.jsx'
 
 export default function CarGrid({ cars, loading, error }) {
+  const [selected, setSelected] = useState(null)
+
   if (loading) {
     return (
       <div className="text-center py-5">
@@ -38,10 +42,14 @@ export default function CarGrid({ cars, loading, error }) {
       <div className="row row-cols-1 row-cols-sm-2 row-cols-xl-3 g-2">
         {cars.map(car => (
           <div className="col" key={car.id}>
-            <CarCard car={car} />
+            <CarCard car={car} onClick={() => setSelected(car)} />
           </div>
         ))}
       </div>
+
+      {selected && (
+        <CarDetail car={selected} onClose={() => setSelected(null)} />
+      )}
     </>
   )
 }
