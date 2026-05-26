@@ -31,7 +31,7 @@ UI_PID_FILE=".ui.pid"
 
 # Ports (override via env)
 API_PORT="${FH6_API_PORT:-5000}"
-UI_PORT="${FH6_UI_PORT:-5173}"
+UI_PORT="${FH6_UI_PORT:-3002}"
 
 show_help() {
     echo ""
