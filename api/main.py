@@ -17,6 +17,21 @@ _cars: list[dict] | None = None
 
 CLASS_ORDER = ["D", "C", "B", "A", "S1", "S2", "R"]
 
+# Auction bid range multipliers per rarity (min_bid, fair_buyout, max_buyout)
+# Based on FH6 auction house observed pricing patterns
+AUCTION_TIERS: dict[str, dict] = {
+    "Common":    {"min": 0.50, "fair": 1.00, "max": 1.50},
+    "Rare":      {"min": 0.60, "fair": 1.20, "max": 1.80},
+    "Epic":      {"min": 0.70, "fair": 1.40, "max": 2.00},
+    "Legendary": {"min": 0.80, "fair": 1.60, "max": 2.50},
+}
+
+CR_ROUND = 1_000  # round to nearest 1000 CR
+
+
+def _round_cr(val: float) -> int:
+    return round(val / CR_ROUND) * CR_ROUND
+
 
 def load_cars() -> list[dict]:
     global _cars
@@ -74,6 +89,30 @@ def get_car(car_id: int):
     if car is None:
         return jsonify({"error": "Car not found"}), 404
     return jsonify(car)
+
+
+@app.get("/api/cars/<int:car_id>/auction")
+def car_auction(car_id: int):
+    """Return estimated auction bid/buyout range for a car."""
+    cars = load_cars()
+    car = next((c for c in cars if c["id"] == car_id), None)
+    if car is None:
+        return jsonify({"error": "Car not found"}), 404
+    if not car.get("auctionable"):
+        return jsonify({"error": "Car is not auctionable", "auctionable": False}), 200
+    base = car.get("base_value")
+    if not base:
+        return jsonify({"error": "No base value available", "auctionable": True}), 200
+    tier = AUCTION_TIERS.get(car["rarity"], AUCTION_TIERS["Rare"])
+    return jsonify({
+        "car_id": car_id,
+        "rarity": car["rarity"],
+        "base_value": base,
+        "min_bid":      _round_cr(base * tier["min"]),
+        "fair_buyout":  _round_cr(base * tier["fair"]),
+        "max_buyout":   _round_cr(base * tier["max"]),
+        "auctionable":  True,
+    })
 
 
 @app.get("/api/filters")

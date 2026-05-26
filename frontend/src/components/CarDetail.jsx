@@ -80,7 +80,7 @@ function bidRange(car) {
   return { lo, hi }
 }
 
-export default function CarDetail({ car, onClose }) {
+export default function CarDetail({ car, owned, onToggleOwned, onClose }) {
   const ref = useRef(null)
   const range = bidRange(car)
   const tags = availTags(car.availability)
@@ -178,7 +178,13 @@ export default function CarDetail({ car, onClose }) {
         </div>
 
         {/* Actions */}
-        <div className="d-flex gap-2">
+        <div className="d-flex gap-2 flex-wrap">
+          <button
+            className={`btn btn-sm ${owned ? 'btn-warning' : 'btn-outline-warning'}`}
+            onClick={onToggleOwned}
+          >
+            {owned ? '🚗 In Garage' : '+ Add to Garage'}
+          </button>
           {car.base_value && car.auctionable && (
             <button
               className="btn btn-sm btn-outline-light copy-btn"

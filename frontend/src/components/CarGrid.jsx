@@ -2,7 +2,7 @@ import { useState } from 'react'
 import CarCard from './CarCard.jsx'
 import CarDetail from './CarDetail.jsx'
 
-export default function CarGrid({ cars, loading, error }) {
+export default function CarGrid({ cars, loading, error, isOwned, toggleOwned }) {
   const [selected, setSelected] = useState(null)
 
   if (loading) {
@@ -42,13 +42,22 @@ export default function CarGrid({ cars, loading, error }) {
       <div className="row row-cols-1 row-cols-sm-2 row-cols-xl-3 g-2">
         {cars.map(car => (
           <div className="col" key={car.id}>
-            <CarCard car={car} onClick={() => setSelected(car)} />
+            <CarCard
+              car={car}
+              owned={isOwned(car.id)}
+              onClick={() => setSelected(car)}
+            />
           </div>
         ))}
       </div>
 
       {selected && (
-        <CarDetail car={selected} onClose={() => setSelected(null)} />
+        <CarDetail
+          car={selected}
+          owned={isOwned(selected.id)}
+          onToggleOwned={() => toggleOwned(selected.id)}
+          onClose={() => setSelected(null)}
+        />
       )}
     </>
   )

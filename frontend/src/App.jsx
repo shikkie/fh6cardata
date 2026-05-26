@@ -1,10 +1,35 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import Navbar from './components/Navbar.jsx'
 import SearchFilters from './components/SearchFilters.jsx'
 import CarGrid from './components/CarGrid.jsx'
 import useDebounce from './hooks/useDebounce.js'
+import useOwnedCars from './hooks/useOwnedCars.js'
 
 const API_BASE = '/api'
+
+const SORT_OPTIONS = [
+  { value: 'pi_desc',    label: 'PI ↓ High→Low' },
+  { value: 'pi_asc',     label: 'PI ↑ Low→High' },
+  { value: 'value_desc', label: 'Value ↓ High→Low' },
+  { value: 'value_asc',  label: 'Value ↑ Low→High' },
+  { value: 'year_desc',  label: 'Year ↓ Newest' },
+  { value: 'year_asc',   label: 'Year ↑ Oldest' },
+  { value: 'name_asc',   label: 'Name A→Z' },
+]
+
+function sortCars(cars, sortKey) {
+  const sorted = [...cars]
+  switch (sortKey) {
+    case 'pi_desc':    return sorted.sort((a, b) => (b.pi ?? 0) - (a.pi ?? 0))
+    case 'pi_asc':     return sorted.sort((a, b) => (a.pi ?? 0) - (b.pi ?? 0))
+    case 'value_desc': return sorted.sort((a, b) => (b.base_value ?? 0) - (a.base_value ?? 0))
+    case 'value_asc':  return sorted.sort((a, b) => (a.base_value ?? 0) - (b.base_value ?? 0))
+    case 'year_desc':  return sorted.sort((a, b) => (b.year ?? 0) - (a.year ?? 0))
+    case 'year_asc':   return sorted.sort((a, b) => (a.year ?? 0) - (b.year ?? 0))
+    case 'name_asc':   return sorted.sort((a, b) => a.full_name.localeCompare(b.full_name))
+    default:           return sorted
+  }
+}
 
 function App() {
   const [cars, setCars] = useState([])
@@ -17,6 +42,10 @@ function App() {
   const [selectedRarity, setSelectedRarity] = useState('')
   const [selectedManufacturer, setSelectedManufacturer] = useState('')
   const [selectedAvailability, setSelectedAvailability] = useState('')
+  const [ownedOnly, setOwnedOnly] = useState(false)
+  const [sortKey, setSortKey] = useState('pi_desc')
+
+  const { owned, toggleOwned, isOwned } = useOwnedCars()
 
   const debouncedQuery = useDebounce(query, 300)
 
@@ -45,12 +74,20 @@ function App() {
 
   useEffect(() => { fetchCars() }, [fetchCars])
 
+  // Apply owned filter + sort client-side (owned lives in localStorage)
+  const displayCars = useMemo(() => {
+    let result = cars
+    if (ownedOnly) result = result.filter(c => owned.has(c.id))
+    return sortCars(result, sortKey)
+  }, [cars, ownedOnly, owned, sortKey])
+
   function clearFilters() {
     setQuery('')
     setSelectedClass('')
     setSelectedRarity('')
     setSelectedManufacturer('')
     setSelectedAvailability('')
+    setOwnedOnly(false)
   }
 
   return (
@@ -69,11 +106,16 @@ function App() {
             onManufacturerChange={setSelectedManufacturer}
             selectedAvailability={selectedAvailability}
             onAvailabilityChange={setSelectedAvailability}
+            ownedOnly={ownedOnly}
+            onOwnedOnlyChange={setOwnedOnly}
+            sortKey={sortKey}
+            onSortChange={setSortKey}
+            sortOptions={SORT_OPTIONS}
             filters={filters}
             onClear={clearFilters}
           />
         </div>
-        <CarGrid cars={cars} loading={loading} error={error} />
+        <CarGrid cars={displayCars} loading={loading} error={error} isOwned={isOwned} toggleOwned={toggleOwned} />
       </main>
     </>
   )

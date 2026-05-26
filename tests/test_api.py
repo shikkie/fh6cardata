@@ -101,3 +101,33 @@ def test_car_has_required_fields(client):
     for car in cars:
         missing = required - car.keys()
         assert not missing, f"Car {car.get('id')} missing fields: {missing}"
+
+
+def test_auction_endpoint_auctionable(client):
+    # Find first auctionable car with a base value
+    import json as _json
+    cars = _json.loads(client.get("/api/cars?auctionable=true").data)
+    car = next((c for c in cars if c.get("base_value")), None)
+    assert car is not None
+    resp = client.get(f"/api/cars/{car['id']}/auction")
+    assert resp.status_code == 200
+    data = _json.loads(resp.data)
+    assert data["auctionable"] is True
+    assert data["min_bid"] > 0
+    assert data["fair_buyout"] >= data["min_bid"]
+    assert data["max_buyout"] >= data["fair_buyout"]
+
+
+def test_auction_endpoint_not_auctionable(client):
+    import json as _json
+    cars = _json.loads(client.get("/api/cars?auctionable=false").data)
+    assert cars
+    resp = client.get(f"/api/cars/{cars[0]['id']}/auction")
+    assert resp.status_code == 200
+    data = _json.loads(resp.data)
+    assert data["auctionable"] is False
+
+
+def test_auction_endpoint_not_found(client):
+    resp = client.get("/api/cars/99999/auction")
+    assert resp.status_code == 404
