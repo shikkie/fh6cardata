@@ -9,15 +9,49 @@ const STAT_LABELS = [
   { key: 'offroad',      label: 'Off-Road' },
 ]
 
+// Map availability keywords → icon + label
+const AVAIL_TAGS = [
+  { key: 'Autoshow',       icon: '🏪', label: 'Autoshow',       color: '#4caf50' },
+  { key: 'Wheelspin',      icon: '🎰', label: 'Wheelspin',      color: '#2196f3' },
+  { key: 'Barn Find',      icon: '🚗', label: 'Barn Find',      color: '#cc7722' },
+  { key: 'Treasure Car',   icon: '💎', label: 'Treasure',       color: '#9c27b0' },
+  { key: 'Horizon Promo',  icon: '⭐', label: 'Promo',          color: '#ff9800' },
+  { key: 'Promo',          icon: '⭐', label: 'Promo',          color: '#ff9800' },
+  { key: 'Car Pass',       icon: '🎟️', label: 'Car Pass',       color: '#e91e63' },
+  { key: 'Car Mastery',    icon: '🏆', label: 'Car Mastery',    color: '#ff5722' },
+  { key: 'Festival Playlist', icon: '📅', label: 'Playlist',   color: '#00bcd4' },
+  { key: 'Hard-to-Find',   icon: '🔍', label: 'Hard-to-Find',  color: '#607d8b' },
+  { key: 'VIP',            icon: '👑', label: 'VIP',            color: '#ffd700' },
+  { key: 'World Time Attack', icon: '⏱️', label: 'Time Attack', color: '#795548' },
+  { key: 'Series',         icon: '📆', label: 'Series',         color: '#009688' },
+  { key: 'Pre-order',      icon: '📦', label: 'Pre-order',      color: '#9e9e9e' },
+  { key: 'Legacy',         icon: '📜', label: 'Legacy',         color: '#8bc34a' },
+  { key: 'Aftermarket',    icon: '🔧', label: 'Aftermarket',    color: '#607d8b' },
+  { key: 'Plus',           icon: '➕', label: 'Plus',           color: '#3f51b5' },
+  { key: 'Year-round',     icon: '📅', label: 'Year-round',     color: '#009688' },
+]
+
+function availTags(availability) {
+  if (!availability) return []
+  const seen = new Set()
+  return AVAIL_TAGS.filter(t => {
+    if (availability.includes(t.key) && !seen.has(t.label)) {
+      seen.add(t.label)
+      return true
+    }
+    return false
+  })
+}
+
 function StatBar({ label, value }) {
   const pct = value != null ? Math.round((value / 10) * 100) : 0
   return (
     <div className="mb-2">
       <div className="d-flex justify-content-between mb-1" style={{ fontSize: '0.78rem' }}>
-        <span className="text-muted">{label}</span>
-        <span className="fw-semibold">{value != null ? value.toFixed(1) : '—'}</span>
+        <span style={{ color: '#aaa' }}>{label}</span>
+        <span style={{ color: '#f5f5f5', fontWeight: 600 }}>{value != null ? value.toFixed(1) : '—'}</span>
       </div>
-      <div className="progress" style={{ height: '6px', backgroundColor: '#333' }}>
+      <div className="progress" style={{ height: '6px', backgroundColor: '#444' }}>
         <div
           className="progress-bar"
           style={{ width: `${pct}%`, backgroundColor: 'var(--fh6-accent)', transition: 'width 0.4s ease' }}
@@ -34,8 +68,6 @@ function formatCR(val) {
 
 function bidRange(car) {
   if (!car.auctionable || !car.base_value) return null
-  // Estimate: min bid ~60% of base value, buyout ~150%
-  // Adjusted by rarity
   const multipliers = {
     'Common':    [0.5, 1.2],
     'Rare':      [0.6, 1.4],
@@ -51,15 +83,14 @@ function bidRange(car) {
 export default function CarDetail({ car, onClose }) {
   const ref = useRef(null)
   const range = bidRange(car)
+  const tags = availTags(car.availability)
 
-  // Close on Escape
   useEffect(() => {
     function onKey(e) { if (e.key === 'Escape') onClose() }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [onClose])
 
-  // Trap focus / close on backdrop click
   function handleBackdrop(e) {
     if (e.target === e.currentTarget) onClose()
   }
@@ -86,46 +117,63 @@ export default function CarDetail({ car, onClose }) {
         {/* Header */}
         <div className="d-flex justify-content-between align-items-start mb-3">
           <div>
-            <div className="fw-bold fs-6">{car.full_name}</div>
-            <div className="text-muted small">{car.availability}</div>
+            <div style={{ color: '#f5f5f5', fontWeight: 700, fontSize: '1rem', lineHeight: 1.3 }}>{car.full_name}</div>
           </div>
-          <button className="btn-close btn-close-white" onClick={onClose} aria-label="Close" />
+          <button className="btn-close btn-close-white ms-2 flex-shrink-0" onClick={onClose} aria-label="Close" />
         </div>
 
         {/* Badges row */}
         <div className="d-flex flex-wrap gap-2 mb-3">
-          {car.pi_class && (
-            <span className="class-badge">{car.pi_class}</span>
-          )}
-          <span className={`rarity-badge rarity-${car.rarity.toLowerCase().replace(' ', '-')}`}>{car.rarity}</span>
+          {car.pi_class && <span className="class-badge">{car.pi_class}</span>}
+          <span className={`rarity-badge rarity-${car.rarity.toLowerCase().replace(/ /g, '-')}`}>{car.rarity}</span>
           {car.pi && <span className="badge bg-secondary">PI {car.pi}</span>}
           {car.country && <span className="badge bg-secondary">{car.country}</span>}
         </div>
 
+        {/* Availability tags */}
+        {tags.length > 0 && (
+          <div className="mb-3">
+            <div className="detail-section-label">How to Get</div>
+            <div className="d-flex flex-wrap gap-2 mt-1">
+              {tags.map(t => (
+                <span
+                  key={t.label}
+                  className="avail-tag"
+                  style={{ borderColor: t.color, color: t.color }}
+                >
+                  {t.icon} {t.label}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Stats */}
         {car.stats && (
           <div className="mb-3">
-            <div className="text-uppercase text-muted mb-2" style={{ fontSize: '0.7rem', letterSpacing: '0.08em' }}>Performance Stats</div>
-            {STAT_LABELS.map(({ key, label }) => (
-              <StatBar key={key} label={label} value={car.stats[key]} />
-            ))}
+            <div className="detail-section-label">Performance Stats</div>
+            <div className="mt-2">
+              {STAT_LABELS.map(({ key, label }) => (
+                <StatBar key={key} label={label} value={car.stats[key]} />
+              ))}
+            </div>
           </div>
         )}
 
         {/* Value & bid range */}
-        <div className="mb-3 p-3 rounded" style={{ backgroundColor: '#1a1a1a' }}>
-          <div className="d-flex justify-content-between align-items-center mb-1">
-            <span className="text-muted small">Base Value</span>
-            <span className="fw-bold" style={{ color: 'var(--fh6-accent)' }}>{formatCR(car.base_value)}</span>
+        <div className="mb-3 p-3 rounded" style={{ backgroundColor: '#111', border: '1px solid #333' }}>
+          <div className="d-flex justify-content-between align-items-center mb-2">
+            <span style={{ color: '#aaa', fontSize: '0.82rem' }}>Base Value</span>
+            <span style={{ color: 'var(--fh6-accent)', fontWeight: 700 }}>{formatCR(car.base_value)}</span>
           </div>
           {range && (
             <div className="d-flex justify-content-between align-items-center">
-              <span className="text-muted small">Est. Auction Range</span>
-              <span className="small">{formatCR(range.lo)} – {formatCR(range.hi)}</span>
+              <span style={{ color: '#aaa', fontSize: '0.82rem' }}>Est. Auction Range</span>
+              <span style={{ color: '#f5f5f5', fontSize: '0.85rem' }}>{formatCR(range.lo)} – {formatCR(range.hi)}</span>
             </div>
           )}
           {!car.auctionable && (
-            <div className="text-muted small"><i className="fas fa-ban me-1" />Not auctionable</div>
+            <div style={{ color: '#888', fontSize: '0.82rem' }}><i className="fas fa-ban me-1" />Not auctionable</div>
           )}
         </div>
 
