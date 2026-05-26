@@ -42,7 +42,7 @@ function App() {
   const [selectedRarity, setSelectedRarity] = useState('')
   const [selectedManufacturer, setSelectedManufacturer] = useState('')
   const [selectedAvailability, setSelectedAvailability] = useState('')
-  const [ownedOnly, setOwnedOnly] = useState(false)
+  const [ownedOnly, setOwnedOnly] = useState(null) // null=all, true=owned, false=not owned
   const [sortKey, setSortKey] = useState('pi_desc')
 
   const { owned, toggleOwned, isOwned } = useOwnedCars()
@@ -77,7 +77,8 @@ function App() {
   // Apply owned filter + sort client-side (owned lives in localStorage)
   const displayCars = useMemo(() => {
     let result = cars
-    if (ownedOnly) result = result.filter(c => owned.has(c.id))
+    if (ownedOnly === true)  result = result.filter(c => owned.has(c.id))
+    if (ownedOnly === false) result = result.filter(c => !owned.has(c.id))
     return sortCars(result, sortKey)
   }, [cars, ownedOnly, owned, sortKey])
 
@@ -87,7 +88,7 @@ function App() {
     setSelectedRarity('')
     setSelectedManufacturer('')
     setSelectedAvailability('')
-    setOwnedOnly(false)
+    setOwnedOnly(null)
   }
 
   return (

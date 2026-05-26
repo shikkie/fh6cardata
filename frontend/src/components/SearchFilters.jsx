@@ -9,7 +9,7 @@ export default function SearchFilters({
   filters,
   onClear,
 }) {
-  const hasFilters = query || selectedClass || selectedRarity || selectedManufacturer || selectedAvailability || ownedOnly
+  const hasFilters = query || selectedClass || selectedRarity || selectedManufacturer || selectedAvailability || ownedOnly !== null
 
   return (
     <div className="search-bar">
@@ -69,16 +69,20 @@ export default function SearchFilters({
           </select>
         </div>
 
-        {/* Owned toggle */}
-        <div className="col-auto d-flex align-items-center">
-          <button
-            className={`btn btn-sm ${ownedOnly ? 'btn-warning' : 'btn-outline-secondary'}`}
-            onClick={() => onOwnedOnlyChange(!ownedOnly)}
-            title={ownedOnly ? 'Showing owned only' : 'Show all cars'}
+        {/* Owned filter */}
+        <div className="col-6 col-sm-3 col-lg-2">
+          <select
+            className="form-select form-select-sm"
+            value={ownedOnly === true ? 'owned' : ownedOnly === false ? 'not_owned' : ''}
+            onChange={e => {
+              const v = e.target.value
+              onOwnedOnlyChange(v === 'owned' ? true : v === 'not_owned' ? false : null)
+            }}
           >
-            <i className="fas fa-garage me-1" />
-            {ownedOnly ? 'Owned' : 'Garage'}
-          </button>
+            <option value="">🚗 All Cars</option>
+            <option value="owned">✅ Owned</option>
+            <option value="not_owned">❌ Not Owned</option>
+          </select>
         </div>
 
         {/* Clear */}
