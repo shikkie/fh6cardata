@@ -212,3 +212,11 @@ body {
   font-size: 0.9rem;
   line-height: 1;
 }
+
+/* Tuning part rows */
+.tune-part-row {
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: #1a1a1a;
+  margin-bottom: 4px;
+}

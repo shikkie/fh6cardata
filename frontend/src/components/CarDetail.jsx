@@ -1,4 +1,5 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import TunePanel from './TunePanel.jsx'
 
 const STAT_LABELS = [
   { key: 'speed',        label: 'Speed' },
@@ -82,6 +83,7 @@ function bidRange(car) {
 
 export default function CarDetail({ car, owned, onToggleOwned, onClose }) {
   const ref = useRef(null)
+  const [activeTab, setActiveTab] = useState('info')
   const range = bidRange(car)
   const tags = availTags(car.availability)
 
@@ -130,17 +132,34 @@ export default function CarDetail({ car, owned, onToggleOwned, onClose }) {
           {car.country && <span className="badge bg-secondary">{car.country}</span>}
         </div>
 
+        {/* Tab bar */}
+        <div className="d-flex gap-1 mb-3">
+          {['info', 'tune'].map(tab => (
+            <button
+              key={tab}
+              className="btn btn-sm"
+              style={{
+                fontSize: '0.78rem',
+                padding: '3px 12px',
+                borderRadius: '12px',
+                backgroundColor: activeTab === tab ? 'var(--fh6-accent)' : 'transparent',
+                color: activeTab === tab ? '#000' : '#aaa',
+                border: `1px solid ${activeTab === tab ? 'var(--fh6-accent)' : '#444'}`,
+                fontWeight: activeTab === tab ? 700 : 400,
+              }}
+              onClick={() => setActiveTab(tab)}
+            >{tab === 'info' ? '📋 Info' : '🔧 Tune'}</button>
+          ))}
+        </div>
+
+        {activeTab === 'info' && (<>
         {/* Availability tags */}
         {tags.length > 0 && (
           <div className="mb-3">
             <div className="detail-section-label">How to Get</div>
             <div className="d-flex flex-wrap gap-2 mt-1">
               {tags.map(t => (
-                <span
-                  key={t.label}
-                  className="avail-tag"
-                  style={{ borderColor: t.color, color: t.color }}
-                >
+                <span key={t.label} className="avail-tag" style={{ borderColor: t.color, color: t.color }}>
                   {t.icon} {t.label}
                 </span>
               ))}
@@ -176,6 +195,11 @@ export default function CarDetail({ car, owned, onToggleOwned, onClose }) {
             <div style={{ color: '#888', fontSize: '0.82rem' }}><i className="fas fa-ban me-1" />Not auctionable</div>
           )}
         </div>
+        </>)}
+
+        {activeTab === 'tune' && (
+          <TunePanel piClass={car.pi_class} />
+        )}
 
         {/* Actions */}
         <div className="d-flex gap-2 flex-wrap">

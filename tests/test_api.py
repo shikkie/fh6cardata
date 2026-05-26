@@ -131,3 +131,45 @@ def test_auction_endpoint_not_auctionable(client):
 def test_auction_endpoint_not_found(client):
     resp = client.get("/api/cars/99999/auction")
     assert resp.status_code == 404
+
+
+def test_parts_list(client):
+    resp = client.get("/api/parts")
+    assert resp.status_code == 200
+    parts = json.loads(resp.data)
+    assert len(parts) > 0
+    assert all("id" in p and "category" in p and "tier" in p for p in parts)
+
+
+def test_parts_filter_by_class(client):
+    resp = client.get("/api/parts?class=D")
+    assert resp.status_code == 200
+    parts = json.loads(resp.data)
+    assert all("D" in p["applies_to_classes"] for p in parts)
+
+
+def test_parts_filter_by_category(client):
+    resp = client.get("/api/parts?category=Engine")
+    assert resp.status_code == 200
+    parts = json.loads(resp.data)
+    assert all(p["category"] == "Engine" for p in parts)
+
+
+def test_parts_categories(client):
+    resp = client.get("/api/parts/categories")
+    assert resp.status_code == 200
+    cats = json.loads(resp.data)
+    assert "Engine" in cats
+    assert "Drivetrain" in cats
+
+
+def test_parts_get_by_id(client):
+    resp = client.get("/api/parts/engine_exhaust_race")
+    assert resp.status_code == 200
+    part = json.loads(resp.data)
+    assert part["id"] == "engine_exhaust_race"
+
+
+def test_parts_not_found(client):
+    resp = client.get("/api/parts/nonexistent_part")
+    assert resp.status_code == 404

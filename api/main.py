@@ -8,12 +8,14 @@ from pathlib import Path
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 
-DATA_PATH = Path(__file__).parent.parent / "data" / "cars.json"
+DATA_PATH  = Path(__file__).parent.parent / "data" / "cars.json"
+PARTS_PATH = Path(__file__).parent.parent / "data" / "parts.json"
 
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "*"}})
 
-_cars: list[dict] | None = None
+_cars:  list[dict] | None = None
+_parts: list[dict] | None = None
 
 CLASS_ORDER = ["D", "C", "B", "A", "S1", "S2", "R"]
 
@@ -39,6 +41,14 @@ def load_cars() -> list[dict]:
         with DATA_PATH.open() as f:
             _cars = json.load(f)
     return _cars
+
+
+def load_parts() -> list[dict]:
+    global _parts
+    if _parts is None:
+        with PARTS_PATH.open() as f:
+            _parts = json.load(f)
+    return _parts
 
 
 @app.get("/api/health")
@@ -128,6 +138,42 @@ def list_filters():
         "rarities": sorted({c["rarity"] for c in cars}),
         "availabilities": sorted({c.get("availability", "") for c in cars} - {""}),
     })
+
+
+@app.get("/api/parts")
+def list_parts():
+    """Return tuning parts, optionally filtered by class and/or category."""
+    parts = load_parts()
+    pi_class = request.args.get("class", "").strip().upper()
+    category = request.args.get("category", "").strip()
+    results = parts
+    if pi_class:
+        results = [p for p in results if pi_class in p.get("applies_to_classes", [])]
+    if category:
+        results = [p for p in results if p["category"].lower() == category.lower()]
+    return jsonify(results)
+
+
+@app.get("/api/parts/categories")
+def list_part_categories():
+    parts = load_parts()
+    cats: dict[str, list[str]] = {}
+    for p in parts:
+        cat = p["category"]
+        sub = p["subcategory"]
+        cats.setdefault(cat, [])
+        if sub not in cats[cat]:
+            cats[cat].append(sub)
+    return jsonify(cats)
+
+
+@app.get("/api/parts/<string:part_id>")
+def get_part(part_id: str):
+    parts = load_parts()
+    part = next((p for p in parts if p["id"] == part_id), None)
+    if part is None:
+        return jsonify({"error": "Part not found"}), 404
+    return jsonify(part)
 
 
 if __name__ == "__main__":
