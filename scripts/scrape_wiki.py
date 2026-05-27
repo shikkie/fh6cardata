@@ -24,6 +24,7 @@ The wiki page uses {{CarListStatsFH6}} templates. Positional parameters:
   13 country code  — see COUNTRY_MAP
   14+ named params — band=, barn=<location>, treasure=<location>, cat=, points=, location=
 """
+
 from __future__ import annotations
 
 import argparse
@@ -203,29 +204,29 @@ def parse_cars(wikitext: str) -> list[dict]:
 
         p = parse_template(tm.group(1))
 
-        page_name   = p.get("pos_0", "").strip()
-        year        = clean_int(p.get("pos_2", ""))
+        page_name = p.get("pos_0", "").strip()
+        year = clean_int(p.get("pos_2", ""))
         rarity_code = p.get("pos_3", "").strip()
-        value_raw   = p.get("pos_4", "").strip()
+        value_raw = p.get("pos_4", "").strip()
         unlock_code = p.get("pos_5", "").strip()
-        pi_raw      = p.get("pos_12", "").strip()
+        pi_raw = p.get("pos_12", "").strip()
         country_code = p.get("pos_13", "").strip()
 
         # Stats (may be empty for unreleased cars)
-        speed  = clean_float(p.get("pos_6", ""))
+        speed = clean_float(p.get("pos_6", ""))
         handling = clean_float(p.get("pos_7", ""))
-        accel  = clean_float(p.get("pos_8", ""))
+        accel = clean_float(p.get("pos_8", ""))
         launch = clean_float(p.get("pos_9", ""))
         braking = clean_float(p.get("pos_10", ""))
         offroad = clean_float(p.get("pos_11", ""))
 
         # Named extras
-        barn_location     = p.get("barn", "")
+        barn_location = p.get("barn", "")
         treasure_location = p.get("treasure", "")
-        cat               = p.get("cat", "")
-        points            = clean_int(p.get("points", ""))
+        cat = p.get("cat", "")
+        points = clean_int(p.get("points", ""))
 
-        rarity  = RARITY_MAP.get(rarity_code, rarity_code or "Unreleased")
+        rarity = RARITY_MAP.get(rarity_code, rarity_code or "Unreleased")
         availability = UNLOCK_MAP.get(unlock_code, unlock_code or "Unknown")
         country = COUNTRY_MAP.get(country_code, country_code or "")
         base_value = clean_int(value_raw)
@@ -234,7 +235,7 @@ def parse_cars(wikitext: str) -> list[dict]:
         # Build model name: strip manufacturer prefix from page_name
         model = page_name
         if model.startswith(current_manufacturer + " "):
-            model = model[len(current_manufacturer) + 1:]
+            model = model[len(current_manufacturer) + 1 :]
         # Strip ONLY race-number prefix that starts with '#' (e.g. '#23 Pennzoil NISMO…')
         model = re.sub(r"^#\d+\s+", "", model).strip()
         # Strip " Forza Edition" suffix from model
@@ -327,6 +328,7 @@ def main() -> None:
 
     # Summary by rarity
     from collections import Counter
+
     rarity_counts = Counter(c["rarity"] for c in cars)
     for rarity, count in sorted(rarity_counts.items(), key=lambda x: -x[1]):
         print(f"  {rarity:18s} {count:3d}")

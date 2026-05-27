@@ -1,4 +1,5 @@
 """Tests for FH6 Car Data Flask API."""
+
 from __future__ import annotations
 
 import json
@@ -110,8 +111,15 @@ def test_car_has_required_fields(client):
     resp = client.get("/api/cars")
     cars = json.loads(resp.data)
     required = {
-        "id", "full_name", "manufacturer", "model",
-        "pi_class", "pi", "rarity", "base_value", "auctionable",
+        "id",
+        "full_name",
+        "manufacturer",
+        "model",
+        "pi_class",
+        "pi",
+        "rarity",
+        "base_value",
+        "auctionable",
     }
     for car in cars:
         missing = required - car.keys()
@@ -121,6 +129,7 @@ def test_car_has_required_fields(client):
 def test_auction_endpoint_auctionable(client):
     # Find first auctionable car with a base value
     import json as _json
+
     cars = _json.loads(client.get("/api/cars?auctionable=true").data)
     car = next((c for c in cars if c.get("base_value")), None)
     assert car is not None
@@ -135,6 +144,7 @@ def test_auction_endpoint_auctionable(client):
 
 def test_auction_endpoint_not_auctionable(client):
     import json as _json
+
     cars = _json.loads(client.get("/api/cars?auctionable=false").data)
     assert cars
     resp = client.get(f"/api/cars/{cars[0]['id']}/auction")

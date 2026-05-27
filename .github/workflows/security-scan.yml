@@ -1,9 +1,7 @@
 name: Security Scan
 
 on:
-  schedule:
-    - cron: '0 9 * * 1'  # Weekly Monday 9 AM UTC
-  workflow_dispatch:
+  workflow_dispatch:  # Disabled: run checks locally
 
 permissions:
   contents: read

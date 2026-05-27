@@ -50,7 +50,7 @@ export function useAppVersion() {
     check()
     const id = setInterval(check, POLL_INTERVAL)
     return () => clearInterval(id)
-  }, [])   // eslint-disable-line react-hooks/exhaustive-deps
+  }, [])
 
   function applyUpdate() {
     // Accept the new version and reload

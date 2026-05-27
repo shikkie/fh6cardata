@@ -1,4 +1,5 @@
 """FH6 Car Data — Flask API."""
+
 from __future__ import annotations
 
 import hashlib
@@ -6,16 +7,16 @@ import json
 import os
 from pathlib import Path
 
-from flask import Flask, jsonify, request, make_response
+from flask import Flask, jsonify, make_response, request
 from flask_cors import CORS
 
-DATA_PATH  = Path(__file__).parent.parent / "data" / "cars.json"
+DATA_PATH = Path(__file__).parent.parent / "data" / "cars.json"
 PARTS_PATH = Path(__file__).parent.parent / "data" / "parts.json"
 
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "*"}})
 
-_cars:  list[dict] | None = None
+_cars: list[dict] | None = None
 _parts: list[dict] | None = None
 
 CLASS_ORDER = ["D", "C", "B", "A", "S1", "S2", "R"]
@@ -23,9 +24,9 @@ CLASS_ORDER = ["D", "C", "B", "A", "S1", "S2", "R"]
 # Auction bid range multipliers per rarity (min_bid, fair_buyout, max_buyout)
 # Based on FH6 auction house observed pricing patterns
 AUCTION_TIERS: dict[str, dict] = {
-    "Common":    {"min": 0.50, "fair": 1.00, "max": 1.50},
-    "Rare":      {"min": 0.60, "fair": 1.20, "max": 1.80},
-    "Epic":      {"min": 0.70, "fair": 1.40, "max": 2.00},
+    "Common": {"min": 0.50, "fair": 1.00, "max": 1.50},
+    "Rare": {"min": 0.60, "fair": 1.20, "max": 1.80},
+    "Epic": {"min": 0.70, "fair": 1.40, "max": 2.00},
     "Legendary": {"min": 0.80, "fair": 1.60, "max": 2.50},
 }
 
@@ -63,7 +64,7 @@ def _etag_response(data: list | dict):
     resp = make_response(body, 200)
     resp.headers["Content-Type"] = "application/json"
     resp.headers["ETag"] = f'"{etag}"'
-    resp.headers["Cache-Control"] = "no-cache"   # revalidate every time
+    resp.headers["Cache-Control"] = "no-cache"  # revalidate every time
     if request.headers.get("If-None-Match") == f'"{etag}"':
         return make_response("", 304)
     return resp
@@ -83,34 +84,34 @@ def api_version():
     detect new deployments independently of the PWA service worker update
     cycle (important on iOS home-screen installs).
     """
-    resp = jsonify({
-        "version": os.environ.get("FH6_BUILD_VERSION", "dev"),
-        "buildTime": os.environ.get("FH6_BUILD_TIME", "unknown"),
-        "cars": len(load_cars()),
-    })
+    resp = jsonify(
+        {
+            "version": os.environ.get("FH6_BUILD_VERSION", "dev"),
+            "buildTime": os.environ.get("FH6_BUILD_TIME", "unknown"),
+            "cars": len(load_cars()),
+        }
+    )
     resp.headers["Cache-Control"] = "no-store"
     return resp
-
-
-
 
 
 @app.get("/api/cars")
 def list_cars():
     cars = load_cars()
 
-    q            = request.args.get("q", "").strip().lower()
+    q = request.args.get("q", "").strip().lower()
     manufacturer = request.args.get("manufacturer", "").strip().lower()
-    pi_class     = request.args.get("class", "").strip().upper()
-    rarity       = request.args.get("rarity", "").strip().lower()
+    pi_class = request.args.get("class", "").strip().upper()
+    rarity = request.args.get("rarity", "").strip().lower()
     availability = request.args.get("availability", "").strip().lower()
-    auctionable  = request.args.get("auctionable", "").strip().lower()
+    auctionable = request.args.get("auctionable", "").strip().lower()
 
     results = cars
 
     if q:
         results = [
-            c for c in results
+            c
+            for c in results
             if q in c["full_name"].lower()
             or q in c["manufacturer"].lower()
             or q in c["model"].lower()
@@ -153,30 +154,31 @@ def car_auction(car_id: int):
     if not base:
         return jsonify({"error": "No base value available", "auctionable": True}), 200
     tier = AUCTION_TIERS.get(car["rarity"], AUCTION_TIERS["Rare"])
-    return jsonify({
-        "car_id": car_id,
-        "rarity": car["rarity"],
-        "base_value": base,
-        "min_bid":      _round_cr(base * tier["min"]),
-        "fair_buyout":  _round_cr(base * tier["fair"]),
-        "max_buyout":   _round_cr(base * tier["max"]),
-        "auctionable":  True,
-    })
+    return jsonify(
+        {
+            "car_id": car_id,
+            "rarity": car["rarity"],
+            "base_value": base,
+            "min_bid": _round_cr(base * tier["min"]),
+            "fair_buyout": _round_cr(base * tier["fair"]),
+            "max_buyout": _round_cr(base * tier["max"]),
+            "auctionable": True,
+        }
+    )
 
 
 @app.get("/api/filters")
 def list_filters():
     """Return distinct values for all filterable fields."""
     cars = load_cars()
-    return _etag_response({
-        "manufacturers": sorted({c["manufacturer"] for c in cars}),
-        "classes": [
-            c for c in CLASS_ORDER
-            if any(car.get("pi_class") == c for car in cars)
-        ],
-        "rarities": sorted({c["rarity"] for c in cars}),
-        "availabilities": sorted({c.get("availability", "") for c in cars} - {""}),
-    })
+    return _etag_response(
+        {
+            "manufacturers": sorted({c["manufacturer"] for c in cars}),
+            "classes": [c for c in CLASS_ORDER if any(car.get("pi_class") == c for car in cars)],
+            "rarities": sorted({c["rarity"] for c in cars}),
+            "availabilities": sorted({c.get("availability", "") for c in cars} - {""}),
+        }
+    )
 
 
 @app.get("/api/parts")

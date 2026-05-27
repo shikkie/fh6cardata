@@ -1,9 +1,7 @@
 name: Code Quality
 
 on:
-  schedule:
-    - cron: '0 12 * * 0'  # Weekly Sunday noon UTC
-  workflow_dispatch:
+  workflow_dispatch:  # Disabled: run checks locally
 
 jobs:
   code-quality:

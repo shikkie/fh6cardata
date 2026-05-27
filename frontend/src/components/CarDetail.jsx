@@ -105,7 +105,7 @@ export default function CarDetail({ car, owned, onToggleOwned, onClose }) {
         btn.textContent = '✓ Copied!'
         setTimeout(() => { btn.textContent = 'Copy value' }, 1500)
       }
-    } catch {}
+    } catch { /* clipboard not available */ }
   }
 
   return (
