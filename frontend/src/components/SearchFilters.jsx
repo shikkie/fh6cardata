@@ -1,3 +1,7 @@
+import ComboBox from './ComboBox.jsx'
+
+const COMBOBOX_THRESHOLD = 5
+
 export default function SearchFilters({
   query, onQueryChange,
   selectedClass, onClassChange,
@@ -10,6 +14,30 @@ export default function SearchFilters({
   onClear,
 }) {
   const hasFilters = query || selectedClass || selectedRarity || selectedManufacturer || selectedAvailability || ownedOnly !== null
+
+  // Helper: use ComboBox for long lists, native <select> for short ones
+  function FilterSelect({ value, onChange, options, placeholder, colClass }) {
+    if (options.length > COMBOBOX_THRESHOLD) {
+      return (
+        <div className={colClass}>
+          <ComboBox
+            value={value}
+            onChange={onChange}
+            options={options}
+            placeholder={placeholder}
+          />
+        </div>
+      )
+    }
+    return (
+      <div className={colClass}>
+        <select className="form-select form-select-sm" value={value} onChange={e => onChange(e.target.value)}>
+          <option value="">{placeholder}</option>
+          {options.map(o => <option key={o} value={o}>{o}</option>)}
+        </select>
+      </div>
+    )
+  }
 
   return (
     <div className="search-bar">
@@ -30,46 +58,50 @@ export default function SearchFilters({
           </div>
         </div>
 
-        {/* Make */}
-        <div className="col-6 col-sm-3 col-lg-2">
-          <select className="form-select form-select-sm" value={selectedManufacturer} onChange={e => onManufacturerChange(e.target.value)}>
-            <option value="">All Makes</option>
-            {filters.manufacturers.map(m => <option key={m} value={m}>{m}</option>)}
-          </select>
-        </div>
+        {/* Make — 89 options → ComboBox */}
+        <FilterSelect
+          value={selectedManufacturer}
+          onChange={onManufacturerChange}
+          options={filters.manufacturers ?? []}
+          placeholder="All Makes"
+          colClass="col-6 col-sm-3 col-lg-2"
+        />
 
-        {/* Class */}
-        <div className="col-6 col-sm-3 col-lg-1">
-          <select className="form-select form-select-sm" value={selectedClass} onChange={e => onClassChange(e.target.value)}>
-            <option value="">Class</option>
-            {filters.classes.map(c => <option key={c} value={c}>{c}</option>)}
-          </select>
-        </div>
+        {/* Class — 7 options → ComboBox */}
+        <FilterSelect
+          value={selectedClass}
+          onChange={onClassChange}
+          options={filters.classes ?? []}
+          placeholder="Class"
+          colClass="col-6 col-sm-3 col-lg-1"
+        />
 
-        {/* Rarity */}
-        <div className="col-6 col-sm-3 col-lg-2">
-          <select className="form-select form-select-sm" value={selectedRarity} onChange={e => onRarityChange(e.target.value)}>
-            <option value="">All Rarities</option>
-            {filters.rarities.map(r => <option key={r} value={r}>{r}</option>)}
-          </select>
-        </div>
+        {/* Rarity — 8 options → ComboBox */}
+        <FilterSelect
+          value={selectedRarity}
+          onChange={onRarityChange}
+          options={filters.rarities ?? []}
+          placeholder="Rarity"
+          colClass="col-6 col-sm-3 col-lg-2"
+        />
 
-        {/* Availability */}
-        <div className="col-6 col-sm-3 col-lg-2">
-          <select className="form-select form-select-sm" value={selectedAvailability} onChange={e => onAvailabilityChange(e.target.value)}>
-            <option value="">All Sources</option>
-            {filters.availabilities && filters.availabilities.map(a => <option key={a} value={a}>{a}</option>)}
-          </select>
-        </div>
+        {/* Availability — 23 options → ComboBox */}
+        <FilterSelect
+          value={selectedAvailability}
+          onChange={onAvailabilityChange}
+          options={filters.availabilities ?? []}
+          placeholder="All Sources"
+          colClass="col-6 col-sm-3 col-lg-2"
+        />
 
-        {/* Sort */}
+        {/* Sort — keep as native select (descriptive labels don't benefit from search) */}
         <div className="col-6 col-sm-3 col-lg-2">
           <select className="form-select form-select-sm" value={sortKey} onChange={e => onSortChange(e.target.value)}>
             {sortOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
           </select>
         </div>
 
-        {/* Owned filter */}
+        {/* Owned filter — 3 options → native select */}
         <div className="col-6 col-sm-3 col-lg-2">
           <select
             className="form-select form-select-sm"
