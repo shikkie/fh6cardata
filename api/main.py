@@ -1,11 +1,12 @@
 """FH6 Car Data — Flask API."""
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 from pathlib import Path
 
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, make_response
 from flask_cors import CORS
 
 DATA_PATH  = Path(__file__).parent.parent / "data" / "cars.json"
@@ -51,9 +52,47 @@ def load_parts() -> list[dict]:
     return _parts
 
 
+def _etag_response(data: list | dict):
+    """Return a JSON response with an ETag header derived from content hash.
+
+    Browsers and the Workbox StaleWhileRevalidate handler can use the ETag for
+    conditional GETs (If-None-Match), reducing unnecessary data transfer.
+    """
+    body = json.dumps(data, separators=(",", ":"), sort_keys=False)
+    etag = hashlib.md5(body.encode()).hexdigest()  # noqa: S324 — not crypto use
+    resp = make_response(body, 200)
+    resp.headers["Content-Type"] = "application/json"
+    resp.headers["ETag"] = f'"{etag}"'
+    resp.headers["Cache-Control"] = "no-cache"   # revalidate every time
+    if request.headers.get("If-None-Match") == f'"{etag}"':
+        return make_response("", 304)
+    return resp
+
+
 @app.get("/api/health")
 def health():
     return jsonify({"status": "ok", "cars": len(load_cars())})
+
+
+@app.get("/api/version")
+def api_version():
+    """Return the current API / data build version.
+
+    Cache-Control: no-store ensures this is never cached by Workbox or
+    browser caches.  The frontend polls this endpoint every 5 minutes to
+    detect new deployments independently of the PWA service worker update
+    cycle (important on iOS home-screen installs).
+    """
+    resp = jsonify({
+        "version": os.environ.get("FH6_BUILD_VERSION", "dev"),
+        "buildTime": os.environ.get("FH6_BUILD_TIME", "unknown"),
+        "cars": len(load_cars()),
+    })
+    resp.headers["Cache-Control"] = "no-store"
+    return resp
+
+
+
 
 
 @app.get("/api/cars")
@@ -89,7 +128,7 @@ def list_cars():
     elif auctionable in ("false", "0", "no"):
         results = [c for c in results if not c.get("auctionable")]
 
-    return jsonify(results)
+    return _etag_response(results)
 
 
 @app.get("/api/cars/<int:car_id>")
@@ -129,7 +168,7 @@ def car_auction(car_id: int):
 def list_filters():
     """Return distinct values for all filterable fields."""
     cars = load_cars()
-    return jsonify({
+    return _etag_response({
         "manufacturers": sorted({c["manufacturer"] for c in cars}),
         "classes": [
             c for c in CLASS_ORDER
@@ -151,7 +190,7 @@ def list_parts():
         results = [p for p in results if pi_class in p.get("applies_to_classes", [])]
     if category:
         results = [p for p in results if p["category"].lower() == category.lower()]
-    return jsonify(results)
+    return _etag_response(results)
 
 
 @app.get("/api/parts/categories")

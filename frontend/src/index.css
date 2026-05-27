@@ -333,3 +333,14 @@ body {
   color: var(--fh6-muted);
   font-style: italic;
 }
+
+/* ── Update banner (issue #10 — Approach 2) ─────────────────────────────── */
+.update-banner {
+  position: sticky;
+  top: 0;
+  z-index: 1100;   /* above Bootstrap navbar (z-index 1030) */
+  background: #1a1200;
+  border-bottom: 1px solid var(--fh6-accent);
+  color: var(--fh6-accent);
+  font-size: 0.9rem;
+}

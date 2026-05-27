@@ -31,3 +31,6 @@ Thumbs.db
 *.swo
 .api.pid
 .ui.pid
+
+# Generated at build time — do not commit
+frontend/public/version.json

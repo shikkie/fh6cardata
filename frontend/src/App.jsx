@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import Navbar from './components/Navbar.jsx'
 import SearchFilters from './components/SearchFilters.jsx'
 import CarGrid from './components/CarGrid.jsx'
+import UpdateBanner from './components/UpdateBanner.jsx'
 import useDebounce from './hooks/useDebounce.js'
 import useOwnedCars from './hooks/useOwnedCars.js'
 
@@ -44,6 +45,8 @@ function App() {
   const [selectedAvailability, setSelectedAvailability] = useState('')
   const [ownedOnly, setOwnedOnly] = useState(null) // null=all, true=owned, false=not owned
   const [sortKey, setSortKey] = useState('pi_desc')
+  // Incrementing this triggers a cache-bypassing re-fetch (Approach 3: Refresh Data)
+  const [dataRefreshCount, setDataRefreshCount] = useState(0)
 
   const { owned, toggleOwned, isOwned } = useOwnedCars()
 
@@ -54,7 +57,7 @@ function App() {
       .then(r => r.json())
       .then(setFilters)
       .catch(() => {})
-  }, [])
+  }, [dataRefreshCount])   // re-fetch filters when user taps "Refresh Data"
 
   const fetchCars = useCallback(() => {
     setLoading(true)
@@ -70,9 +73,26 @@ function App() {
       .then(r => r.json())
       .then(data => { setCars(data); setLoading(false) })
       .catch(e => { setError(e.message); setLoading(false) })
-  }, [debouncedQuery, selectedManufacturer, selectedClass, selectedRarity, selectedAvailability])
+  // dataRefreshCount is intentionally included: incrementing it creates a new
+  // fetchCars reference which the useEffect below picks up.
+  }, [debouncedQuery, selectedManufacturer, selectedClass, selectedRarity, selectedAvailability, dataRefreshCount])  // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => { fetchCars() }, [fetchCars])
+
+  // ── Approach 3: Refresh Data ────────────────────────────────────────────
+  // Deletes the Workbox API caches so the next fetch() goes straight to the
+  // network, then increments the refresh counter to trigger a React re-fetch.
+  async function handleRefreshData() {
+    if ('caches' in window) {
+      const keys = await caches.keys()
+      await Promise.all(
+        keys
+          .filter(k => k.startsWith('fh6-') && k.endsWith('-api'))
+          .map(k => caches.delete(k))
+      )
+    }
+    setDataRefreshCount(c => c + 1)
+  }
 
   // Apply owned filter + sort client-side (owned lives in localStorage)
   const displayCars = useMemo(() => {
@@ -93,7 +113,8 @@ function App() {
 
   return (
     <>
-      <Navbar />
+      <UpdateBanner />
+      <Navbar onRefreshData={handleRefreshData} />
       <main className="container-fluid px-3 py-3">
         <div className="search-sticky mb-3">
           <SearchFilters
