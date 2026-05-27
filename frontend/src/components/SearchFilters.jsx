@@ -17,7 +17,7 @@ export default function SearchFilters({
         {/* Search */}
         <div className="col-12 col-sm-6 col-lg-3">
           <div className="input-group input-group-sm">
-            <span className="input-group-text bg-dark border-secondary text-muted">
+            <span className="input-group-text">
               <i className="fas fa-magnifying-glass" />
             </span>
             <input

@@ -38,6 +38,12 @@ body {
   color: var(--fh6-text);
 }
 
+.search-bar .input-group-text {
+  background-color: var(--fh6-surface2);
+  border: 1px solid #333;
+  color: var(--fh6-muted);
+}
+
 .search-bar input:focus,
 .search-bar select:focus {
   background-color: var(--fh6-surface2);
