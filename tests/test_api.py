@@ -41,6 +41,21 @@ def test_filter_by_class(client):
     assert all(c["pi_class"] == "S1" for c in cars)
 
 
+def test_filter_by_r_class(client):
+    resp = client.get("/api/cars?class=R")
+    assert resp.status_code == 200
+    cars = json.loads(resp.data)
+    assert len(cars) > 0, "R class should have cars"
+    assert all(c["pi_class"] == "R" for c in cars)
+
+
+def test_filters_includes_r_class(client):
+    resp = client.get("/api/filters")
+    assert resp.status_code == 200
+    data = json.loads(resp.data)
+    assert "R" in data["classes"], "R class should appear in filter options"
+
+
 def test_filter_by_rarity(client):
     resp = client.get("/api/cars?rarity=Epic")
     assert resp.status_code == 200
