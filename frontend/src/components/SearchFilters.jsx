@@ -18,7 +18,7 @@ export default function SearchFilters({
         <div className="col-12 col-sm-6 col-lg-3">
           <div className="input-group input-group-sm">
             <span className="input-group-text bg-dark border-secondary text-muted">
-              <i className="fas fa-search" />
+              <i className="fas fa-magnifying-glass" />
             </span>
             <input
               type="text"
@@ -89,7 +89,7 @@ export default function SearchFilters({
         {hasFilters && (
           <div className="col-auto">
             <button className="btn btn-sm btn-outline-secondary" onClick={onClear} title="Clear filters">
-              <i className="fas fa-times" />
+              <i className="fas fa-xmark" />
             </button>
           </div>
         )}
