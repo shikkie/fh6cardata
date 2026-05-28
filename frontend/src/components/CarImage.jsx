@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 const CAR_PLACEHOLDER = (
   <svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg" style={{ width: '100%', height: '100%' }}>
@@ -35,6 +35,8 @@ const CAR_PLACEHOLDER = (
  */
 export default function CarImage({ src, alt, className = '' }) {
   const [failed, setFailed] = useState(false)
+
+  useEffect(() => { setFailed(false) }, [src])
 
   const showPlaceholder = !src || failed
 
