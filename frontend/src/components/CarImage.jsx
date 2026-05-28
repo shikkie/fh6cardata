@@ -33,7 +33,7 @@ const CAR_PLACEHOLDER = (
  * @param {string}      alt  - accessible alt text
  * @param {string}      [className] - extra class names for the container
  */
-export default function CarImage({ src, alt, className = '' }) {
+export default function CarImage({ src, alt, className = '', lazy = true }) {
   const [failed, setFailed] = useState(false)
 
   useEffect(() => { setFailed(false) }, [src])
@@ -52,7 +52,7 @@ export default function CarImage({ src, alt, className = '' }) {
           alt={alt}
           className="car-image"
           onError={() => setFailed(true)}
-          loading="eager"
+          loading={lazy ? 'lazy' : 'eager'}
           referrerPolicy="no-referrer"
         />
       )}
