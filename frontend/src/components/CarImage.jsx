@@ -53,6 +53,7 @@ export default function CarImage({ src, alt, className = '' }) {
           className="car-image"
           onError={() => setFailed(true)}
           loading="lazy"
+          referrerPolicy="no-referrer"
         />
       )}
     </div>
