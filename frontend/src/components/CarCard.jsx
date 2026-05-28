@@ -1,3 +1,5 @@
+import CarImage from './CarImage.jsx'
+
 function rarityClass(rarity) {
   const map = {
     'Common': 'rarity-common',
@@ -28,6 +30,8 @@ export default function CarCard({ car, owned, onClick }) {
       tabIndex={0}
       onKeyDown={e => e.key === 'Enter' && onClick?.()}
     >
+      <CarImage src={car.image_url} alt={car.full_name} className="car-card-thumb mb-2" />
+
       <div className="d-flex justify-content-between align-items-start mb-1">
         <div className="d-flex gap-1 flex-wrap">
           {car.pi_class && <span className="class-badge">{car.pi_class}</span>}
