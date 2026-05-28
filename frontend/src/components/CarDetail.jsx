@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
 import TunePanel from './TunePanel.jsx'
-import CarImage from './CarImage.jsx'
 
 const STAT_LABELS = [
   { key: 'speed',        label: 'Speed' },
@@ -118,7 +117,16 @@ export default function CarDetail({ car, owned, onToggleOwned, onClose }) {
     >
       <div className="car-detail-sheet" ref={ref}>
         {/* Car image hero */}
-        <CarImage src={car.image_url} alt={car.full_name} className="car-detail-hero mb-3" lazy={false} />
+        {car.image_url && (
+          <img
+            src={car.image_url}
+            alt={car.full_name}
+            className="car-detail-hero mb-3"
+            referrerPolicy="no-referrer"
+            loading="eager"
+            onError={(e) => { e.currentTarget.style.display = 'none' }}
+          />
+        )}
 
         {/* Header */}
         <div className="d-flex justify-content-between align-items-start mb-3">
