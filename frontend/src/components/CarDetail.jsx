@@ -81,11 +81,56 @@ function bidRange(car) {
   return { lo, hi }
 }
 
-export default function CarDetail({ car, owned, onToggleOwned, onClose }) {
+export default function CarDetail({ car, owned, onToggleOwned, onClose, onCarUpdate }) {
   const ref = useRef(null)
   const [activeTab, setActiveTab] = useState('info')
   const range = bidRange(car)
   const tags = availTags(car.availability)
+
+  const [editingOrdinal, setEditingOrdinal] = useState(false)
+  const [ordinalInput, setOrdinalInput] = useState('')
+  const [ordinalSaving, setOrdinalSaving] = useState(false)
+  const [ordinalError, setOrdinalError] = useState(null)
+
+  function startEditOrdinal() {
+    setOrdinalInput(car.carordinalid != null ? String(car.carordinalid) : '')
+    setOrdinalError(null)
+    setEditingOrdinal(true)
+  }
+
+  async function saveOrdinal() {
+    const val = ordinalInput.trim()
+    const parsed = val === '' ? null : parseInt(val, 10)
+    if (val !== '' && (isNaN(parsed) || parsed < 0)) {
+      setOrdinalError('Must be a positive integer')
+      return
+    }
+    setOrdinalSaving(true)
+    setOrdinalError(null)
+    try {
+      const resp = await fetch(`/api/cars/${car.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ carordinalid: parsed }),
+      })
+      const data = await resp.json()
+      if (!resp.ok) {
+        setOrdinalError(data.error + (data.conflict_car ? ` (${data.conflict_car})` : ''))
+        return
+      }
+      onCarUpdate?.(data)
+      setEditingOrdinal(false)
+    } catch {
+      const isOffline = !navigator.onLine
+      setOrdinalError(
+        isOffline
+          ? 'No network connection — check that the API is reachable and try again'
+          : 'Could not reach the API server — it may need to be restarted (run ./run-dev.sh restart)'
+      )
+    } finally {
+      setOrdinalSaving(false)
+    }
+  }
 
   useEffect(() => {
     function onKey(e) { if (e.key === 'Escape') onClose() }
@@ -138,7 +183,7 @@ export default function CarDetail({ car, owned, onToggleOwned, onClose }) {
 
         {/* Badges row */}
         <div className="d-flex flex-wrap gap-2 mb-3">
-          {car.pi_class && <span className="class-badge">{car.pi_class}</span>}
+          {car.pi_class && <span className={`class-badge class-${car.pi_class}`}>{car.pi_class}</span>}
           <span className={`rarity-badge rarity-${car.rarity.toLowerCase().replace(/ /g, '-')}`}>{car.rarity}</span>
           {car.pi && <span className="badge bg-secondary">PI {car.pi}</span>}
           {car.country && <span className="badge bg-secondary">{car.country}</span>}
@@ -190,6 +235,61 @@ export default function CarDetail({ car, owned, onToggleOwned, onClose }) {
             </div>
           </div>
         )}
+
+        {/* Ordinal ID */}
+        <div className="mb-3 p-3 rounded" style={{ backgroundColor: '#111', border: '1px solid #333' }}>
+          <div className="d-flex justify-content-between align-items-center">
+            <span style={{ color: '#aaa', fontSize: '0.82rem' }}>Telemetry Ordinal ID</span>
+            {!editingOrdinal && (
+              <div className="d-flex align-items-center gap-2">
+                <span style={{ color: '#f5f5f5', fontFamily: 'monospace', fontSize: '0.85rem' }}>
+                  {car.carordinalid != null ? `#${car.carordinalid}` : <span style={{ color: '#555' }}>not set</span>}
+                </span>
+                <button
+                  className="btn btn-sm btn-outline-secondary"
+                  style={{ fontSize: '0.72rem', padding: '1px 8px' }}
+                  onClick={startEditOrdinal}
+                  title="Set ordinal ID"
+                >✏️</button>
+              </div>
+            )}
+          </div>
+          {editingOrdinal && (
+            <div className="mt-2">
+              <div className="d-flex gap-2 align-items-center">
+                <input
+                  type="number"
+                  min="0"
+                  className="form-control form-control-sm"
+                  style={{ backgroundColor: '#1a1a1a', color: '#f5f5f5', border: '1px solid #555', width: '140px', fontFamily: 'monospace' }}
+                  placeholder="e.g. 1234567"
+                  value={ordinalInput}
+                  onChange={e => setOrdinalInput(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter') saveOrdinal(); if (e.key === 'Escape') setEditingOrdinal(false) }}
+                  autoFocus
+                />
+                <button
+                  className="btn btn-sm btn-outline-success"
+                  style={{ fontSize: '0.72rem', padding: '2px 10px' }}
+                  onClick={saveOrdinal}
+                  disabled={ordinalSaving}
+                >{ordinalSaving ? '…' : 'Save'}</button>
+                <button
+                  className="btn btn-sm btn-outline-secondary"
+                  style={{ fontSize: '0.72rem', padding: '2px 8px' }}
+                  onClick={() => setEditingOrdinal(false)}
+                  disabled={ordinalSaving}
+                >✕</button>
+              </div>
+              {ordinalError && (
+                <div style={{ color: '#f44', fontSize: '0.75rem', marginTop: '4px' }}>{ordinalError}</div>
+              )}
+              <div style={{ color: '#666', fontSize: '0.72rem', marginTop: '4px' }}>
+                Leave blank to clear. From the Forza Data Out UDP stream.
+              </div>
+            </div>
+          )}
+        </div>
 
         {/* Value & bid range */}
         <div className="mb-3 p-3 rounded" style={{ backgroundColor: '#111', border: '1px solid #333' }}>

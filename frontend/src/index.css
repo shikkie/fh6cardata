@@ -73,10 +73,19 @@ body {
   font-size: 0.75rem;
   padding: 2px 8px;
   border-radius: 4px;
+  color: #fff;
   background-color: #333;
-  color: var(--fh6-accent);
-  border: 1px solid var(--fh6-accent);
 }
+
+/* Forza Horizon class colors (from official wiki CSS) */
+.class-D  { background-color: #00a4ff; }
+.class-C  { background-color: #ffaf00; color: #111; }
+.class-B  { background-color: #ff6d12; }
+.class-A  { background-color: #ea4e14; }
+.class-S1 { background-color: #9d56ff; }
+.class-S2 { background-color: #3460fc; }
+.class-R  { background-color: #19a83c; }
+.class-X  { background-color: #27cf42; color: #111; }
 
 .rarity-badge {
   font-size: 0.72rem;
@@ -214,9 +223,26 @@ body {
   box-shadow: 0 0 0 1px rgba(240, 165, 0, 0.3);
 }
 
-.owned-badge {
+.garage-btn {
+  background: transparent;
+  border: 1px solid #444;
+  border-radius: 8px;
+  padding: 2px 7px;
   font-size: 0.9rem;
-  line-height: 1;
+  cursor: pointer;
+  opacity: 0.4;
+  transition: opacity 0.15s, border-color 0.15s;
+  line-height: 1.5;
+}
+
+.garage-btn:hover {
+  opacity: 0.75;
+  border-color: #888;
+}
+
+.garage-btn-owned {
+  opacity: 1;
+  border-color: #f0a500;
 }
 
 /* Tuning part rows */

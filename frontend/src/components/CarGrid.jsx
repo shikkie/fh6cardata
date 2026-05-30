@@ -2,8 +2,13 @@ import { useState } from 'react'
 import CarCard from './CarCard.jsx'
 import CarDetail from './CarDetail.jsx'
 
-export default function CarGrid({ cars, loading, error, isOwned, toggleOwned }) {
+export default function CarGrid({ cars, loading, error, isOwned, toggleOwned, onCarUpdate }) {
   const [selected, setSelected] = useState(null)
+
+  function handleCarUpdate(updatedCar) {
+    setSelected(updatedCar)
+    onCarUpdate?.(updatedCar)
+  }
 
   if (loading) {
     return (
@@ -46,6 +51,7 @@ export default function CarGrid({ cars, loading, error, isOwned, toggleOwned }) 
               car={car}
               owned={isOwned(car.id)}
               onClick={() => setSelected(car)}
+              onToggleOwned={() => toggleOwned(car.id)}
             />
           </div>
         ))}
@@ -57,6 +63,7 @@ export default function CarGrid({ cars, loading, error, isOwned, toggleOwned }) 
           owned={isOwned(selected.id)}
           onToggleOwned={() => toggleOwned(selected.id)}
           onClose={() => setSelected(null)}
+          onCarUpdate={handleCarUpdate}
         />
       )}
     </>

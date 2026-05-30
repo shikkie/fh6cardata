@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
+import contextlib
 import hashlib
 import json
 import os
+import tempfile
+import threading
+from datetime import UTC, datetime
 from pathlib import Path
 
 from flask import Flask, jsonify, make_response, request
@@ -12,12 +16,16 @@ from flask_cors import CORS
 
 DATA_PATH = Path(__file__).parent.parent / "data" / "cars.json"
 PARTS_PATH = Path(__file__).parent.parent / "data" / "parts.json"
+GARAGE_PATH = Path(__file__).parent.parent / "data" / "garage.json"
 
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 _cars: list[dict] | None = None
 _parts: list[dict] | None = None
+_garage: list[dict] | None = None
+_data_lock = threading.Lock()
+_garage_lock = threading.Lock()
 
 CLASS_ORDER = ["D", "C", "B", "A", "S1", "S2", "R"]
 
@@ -51,6 +59,49 @@ def load_parts() -> list[dict]:
         with PARTS_PATH.open() as f:
             _parts = json.load(f)
     return _parts
+
+
+def _save_cars(cars: list[dict]) -> None:
+    """Atomically overwrite cars.json with the current in-memory list."""
+    body = json.dumps(cars, indent=2, ensure_ascii=False)
+    tmp_fd, tmp_path = tempfile.mkstemp(dir=DATA_PATH.parent, suffix=".tmp")
+    try:
+        with os.fdopen(tmp_fd, "w", encoding="utf-8") as fh:
+            fh.write(body)
+        os.replace(tmp_path, DATA_PATH)
+    except Exception:
+        with contextlib.suppress(OSError):
+            os.unlink(tmp_path)
+        raise
+
+
+def load_garage() -> list[dict]:
+    global _garage
+    if _garage is None:
+        if GARAGE_PATH.exists():
+            with GARAGE_PATH.open() as f:
+                _garage = json.load(f)
+        else:
+            _garage = []
+    return _garage
+
+
+def _save_garage(garage: list[dict]) -> None:
+    """Atomically overwrite garage.json."""
+    body = json.dumps(garage, indent=2, ensure_ascii=False)
+    tmp_fd, tmp_path = tempfile.mkstemp(dir=GARAGE_PATH.parent, suffix=".tmp")
+    try:
+        with os.fdopen(tmp_fd, "w", encoding="utf-8") as fh:
+            fh.write(body)
+        os.replace(tmp_path, GARAGE_PATH)
+    except Exception:
+        with contextlib.suppress(OSError):
+            os.unlink(tmp_path)
+        raise
+
+
+def _now_iso() -> str:
+    return datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 def _etag_response(data: list | dict):
@@ -109,12 +160,15 @@ def list_cars():
     results = cars
 
     if q:
+        # Also match by carordinalid when the query looks like a number
+        q_is_int = q.isdigit()
         results = [
             c
             for c in results
             if q in c["full_name"].lower()
             or q in c["manufacturer"].lower()
             or q in c["model"].lower()
+            or (q_is_int and str(c.get("carordinalid", "")) == q)
         ]
     if manufacturer:
         results = [c for c in results if c["manufacturer"].lower() == manufacturer]
@@ -139,6 +193,78 @@ def get_car(car_id: int):
     if car is None:
         return jsonify({"error": "Car not found"}), 404
     return jsonify(car)
+
+
+@app.patch("/api/cars/<int:car_id>")
+def patch_car(car_id: int):
+    """Update mutable fields on a car and persist to cars.json.
+
+    Currently supported fields: ``carordinalid`` (int ≥ 0 or null to clear).
+    """
+    body = request.get_json(silent=True)
+    if body is None:
+        return jsonify({"error": "Request body must be JSON"}), 400
+
+    with _data_lock:
+        cars = load_cars()
+        idx = next((i for i, c in enumerate(cars) if c["id"] == car_id), None)
+        if idx is None:
+            return jsonify({"error": "Car not found"}), 404
+
+        if "carordinalid" in body:
+            raw = body["carordinalid"]
+            if raw is None:
+                cars[idx]["carordinalid"] = None
+            else:
+                if not isinstance(raw, int) or raw < 0:
+                    return (
+                        jsonify({"error": "carordinalid must be a non-negative integer or null"}),
+                        422,
+                    )
+                # Enforce uniqueness — reject if another car already owns this ordinal
+                duplicate = next(
+                    (c for c in cars if c.get("carordinalid") == raw and c["id"] != car_id),
+                    None,
+                )
+                if duplicate:
+                    return (
+                        jsonify(
+                            {
+                                "error": "carordinalid already assigned",
+                                "conflict_car_id": duplicate["id"],
+                                "conflict_car": duplicate["full_name"],
+                            }
+                        ),
+                        409,
+                    )
+                cars[idx]["carordinalid"] = raw
+
+        _save_cars(cars)
+        return jsonify(cars[idx])
+
+
+@app.get("/api/cars/by-ordinal/<int:ordinal_id>")
+def get_car_by_ordinal(ordinal_id: int):
+    """Look up a car by its telemetry carordinalid.
+
+    Driving a car in Forza implies ownership, so if the car isn't already in
+    the garage it's added automatically with source="telemetry".  The response
+    includes a ``garage_updated`` flag so the caller can tell when this happens.
+    """
+    cars = load_cars()
+    car = next((c for c in cars if c.get("carordinalid") == ordinal_id), None)
+    if car is None:
+        return jsonify({"error": "No car mapped to that ordinal ID"}), 404
+
+    garage_updated = False
+    with _garage_lock:
+        garage = load_garage()
+        if not any(e["car_id"] == car["id"] for e in garage):
+            garage.append({"car_id": car["id"], "added_at": _now_iso(), "source": "telemetry"})
+            _save_garage(garage)
+            garage_updated = True
+
+    return jsonify({**car, "garage_updated": garage_updated})
 
 
 @app.get("/api/cars/<int:car_id>/auction")
@@ -215,6 +341,84 @@ def get_part(part_id: str):
     if part is None:
         return jsonify({"error": "Part not found"}), 404
     return jsonify(part)
+
+
+# ---------------------------------------------------------------------------
+# Garage — owned car persistence
+# ---------------------------------------------------------------------------
+
+
+@app.get("/api/garage")
+def get_garage():
+    """Return the full garage with per-entry metadata."""
+    garage = load_garage()
+    owned_car_ids = [e["car_id"] for e in garage]
+    return _etag_response({"entries": garage, "owned_car_ids": owned_car_ids})
+
+
+@app.post("/api/garage/sync")
+def sync_garage():
+    """Merge a client-side list of owned car IDs into the server garage.
+
+    Accepts ``{"car_ids": [1, 2, 3]}``.  New IDs are added with
+    ``source="manual"``; existing entries are left untouched.  Returns the
+    full merged ``owned_car_ids`` list so the client can update localStorage.
+
+    Safe to call on every app load for offline→online sync.
+    """
+    body = request.get_json(silent=True)
+    if body is None or not isinstance(body.get("car_ids"), list):
+        return jsonify({"error": 'Request body must be {"car_ids": [int, ...]}'}), 400
+
+    valid_ids = {c["id"] for c in load_cars()}
+    # Silently ignore unknown/invalid IDs
+    incoming = {int(i) for i in body["car_ids"] if isinstance(i, int) and i in valid_ids}
+
+    with _garage_lock:
+        garage = load_garage()
+        existing_ids = {e["car_id"] for e in garage}
+        new_ids = incoming - existing_ids
+        if new_ids:
+            now = _now_iso()
+            for car_id in sorted(new_ids):
+                garage.append({"car_id": car_id, "added_at": now, "source": "manual"})
+            _save_garage(garage)
+        owned_car_ids = [e["car_id"] for e in garage]
+
+    return jsonify({"owned_car_ids": owned_car_ids, "added": len(new_ids)})
+
+
+@app.post("/api/garage/<int:car_id>")
+def add_to_garage(car_id: int):
+    """Add a car to the garage (idempotent)."""
+    cars = load_cars()
+    if not any(c["id"] == car_id for c in cars):
+        return jsonify({"error": "Car not found"}), 404
+
+    with _garage_lock:
+        garage = load_garage()
+        existing = next((e for e in garage if e["car_id"] == car_id), None)
+        if existing:
+            return jsonify(existing), 200
+        entry = {"car_id": car_id, "added_at": _now_iso(), "source": "manual"}
+        garage.append(entry)
+        _save_garage(garage)
+
+    return jsonify(entry), 201
+
+
+@app.delete("/api/garage/<int:car_id>")
+def remove_from_garage(car_id: int):
+    """Remove a car from the garage."""
+    with _garage_lock:
+        garage = load_garage()
+        before = len(garage)
+        garage[:] = [e for e in garage if e["car_id"] != car_id]
+        if len(garage) == before:
+            return jsonify({"error": "Car not in garage"}), 404
+        _save_garage(garage)
+
+    return jsonify({"removed": True, "car_id": car_id})
 
 
 if __name__ == "__main__":

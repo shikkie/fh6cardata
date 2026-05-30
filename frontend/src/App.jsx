@@ -102,6 +102,10 @@ function App() {
     return sortCars(result, sortKey)
   }, [cars, ownedOnly, owned, sortKey])
 
+  function handleCarUpdate(updatedCar) {
+    setCars(prev => prev.map(c => c.id === updatedCar.id ? updatedCar : c))
+  }
+
   function clearFilters() {
     setQuery('')
     setSelectedClass('')
@@ -137,7 +141,7 @@ function App() {
             onClear={clearFilters}
           />
         </div>
-        <CarGrid cars={displayCars} loading={loading} error={error} isOwned={isOwned} toggleOwned={toggleOwned} />
+        <CarGrid cars={displayCars} loading={loading} error={error} isOwned={isOwned} toggleOwned={toggleOwned} onCarUpdate={handleCarUpdate} />
       </main>
     </>
   )

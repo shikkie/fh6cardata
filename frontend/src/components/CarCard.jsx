@@ -19,7 +19,7 @@ function formatCredits(val) {
   return val.toLocaleString('en-US') + ' CR'
 }
 
-export default function CarCard({ car, owned, onClick }) {
+export default function CarCard({ car, owned, onClick, onToggleOwned }) {
   const noAuction = !car.auctionable
 
   return (
@@ -34,11 +34,10 @@ export default function CarCard({ car, owned, onClick }) {
 
       <div className="d-flex justify-content-between align-items-start mb-1">
         <div className="d-flex gap-1 flex-wrap">
-          {car.pi_class && <span className="class-badge">{car.pi_class}</span>}
+          {car.pi_class && <span className={`class-badge class-${car.pi_class}`}>{car.pi_class}</span>}
           <span className={`rarity-badge ${rarityClass(car.rarity)}`}>{car.rarity}</span>
         </div>
         <div className="d-flex align-items-center gap-2">
-          {owned && <span className="owned-badge" title="In your garage">🚗</span>}
           {car.pi && <span style={{ color: '#888', fontSize: '0.8rem' }}>PI {car.pi}</span>}
         </div>
       </div>
@@ -55,9 +54,21 @@ export default function CarCard({ car, owned, onClick }) {
           ? <span className="base-value no-auction"><i className="fas fa-ban me-1" />Not auctionable</span>
           : <span className="base-value">{formatCredits(car.base_value) || '—'}</span>
         }
-        {car.country && (
-          <span style={{ color: '#888', fontSize: '0.8rem' }}>{car.country}</span>
-        )}
+        <div className="d-flex align-items-center gap-2">
+          {car.carordinalid != null && (
+            <span title="Telemetry Ordinal ID" style={{ color: '#666', fontSize: '0.72rem', fontFamily: 'monospace' }}>
+              #{car.carordinalid}
+            </span>
+          )}
+          <button
+            className={`garage-btn${owned ? ' garage-btn-owned' : ''}`}
+            title={owned ? 'Remove from garage' : 'Add to garage'}
+            onClick={e => { e.stopPropagation(); onToggleOwned?.() }}
+            aria-pressed={owned}
+          >
+            🚗
+          </button>
+        </div>
       </div>
     </div>
   )
