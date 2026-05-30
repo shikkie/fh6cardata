@@ -81,7 +81,7 @@ function bidRange(car) {
   return { lo, hi }
 }
 
-export default function CarDetail({ car, owned, onToggleOwned, onClose, onCarUpdate }) {
+export default function CarDetail({ car, owned, onToggleOwned, wishlisted, onToggleWishlisted, onClose, onCarUpdate }) {
   const ref = useRef(null)
   const [activeTab, setActiveTab] = useState('info')
   const range = bidRange(car)
@@ -91,6 +91,17 @@ export default function CarDetail({ car, owned, onToggleOwned, onClose, onCarUpd
   const [ordinalInput, setOrdinalInput] = useState('')
   const [ordinalSaving, setOrdinalSaving] = useState(false)
   const [ordinalError, setOrdinalError] = useState(null)
+
+  // Last telemetry ordinal — used for Quick Assign
+  const [lastOrdinal, setLastOrdinal] = useState(null)
+  const [quickAssigning, setQuickAssigning] = useState(false)
+
+  useEffect(() => {
+    fetch('/api/telemetry/last-ordinal')
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data?.ordinal_id != null) setLastOrdinal(data) })
+      .catch(() => {})
+  }, [])
 
   function startEditOrdinal() {
     setOrdinalInput(car.carordinalid != null ? String(car.carordinalid) : '')
@@ -129,6 +140,31 @@ export default function CarDetail({ car, owned, onToggleOwned, onClose, onCarUpd
       )
     } finally {
       setOrdinalSaving(false)
+    }
+  }
+
+  async function quickAssignOrdinal() {
+    if (!lastOrdinal?.ordinal_id) return
+    setQuickAssigning(true)
+    setOrdinalError(null)
+    try {
+      const resp = await fetch(`/api/cars/${car.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ carordinalid: lastOrdinal.ordinal_id }),
+      })
+      const data = await resp.json()
+      if (!resp.ok) {
+        setOrdinalError(data.error + (data.conflict_car ? ` (${data.conflict_car})` : ''))
+        return
+      }
+      onCarUpdate?.(data)
+      // Ordinal is now taken — hide the Quick Assign button
+      setLastOrdinal(prev => ({ ...prev, assigned_to_car_id: car.id, assigned_to_car_name: car.full_name }))
+    } catch {
+      setOrdinalError('Could not reach the API server')
+    } finally {
+      setQuickAssigning(false)
     }
   }
 
@@ -245,6 +281,29 @@ export default function CarDetail({ car, owned, onToggleOwned, onClose, onCarUpd
                 <span style={{ color: '#f5f5f5', fontFamily: 'monospace', fontSize: '0.85rem' }}>
                   {car.carordinalid != null ? `#${car.carordinalid}` : <span style={{ color: '#555' }}>not set</span>}
                 </span>
+                {/* Quick Assign button — only shown when a telemetry hit has been recorded */}
+                {lastOrdinal?.ordinal_id != null && (() => {
+                  // Ordinal is already identified to a car (any car) — 1:1 mapping is taken, hide.
+                  if (lastOrdinal.assigned_to_car_id != null) return null
+                  // Ordinal is free; show the button. Disable it when this car already has an ordinal
+                  // to prevent an accidental overwrite — the user must use ✏️ to change it explicitly.
+                  const thisCarHasOrdinal = car.carordinalid != null
+                  return (
+                    <button
+                      className="btn btn-sm btn-outline-success"
+                      style={{ fontSize: '0.72rem', padding: '1px 8px' }}
+                      onClick={quickAssignOrdinal}
+                      disabled={thisCarHasOrdinal || quickAssigning}
+                      title={
+                        thisCarHasOrdinal
+                          ? `This car already has ordinal #${car.carordinalid} — use ✏️ to change it`
+                          : `Quick assign last telemetry ordinal #${lastOrdinal.ordinal_id}`
+                      }
+                    >
+                      {quickAssigning ? '…' : `⚡ #${lastOrdinal.ordinal_id}`}
+                    </button>
+                  )
+                })()}
                 <button
                   className="btn btn-sm btn-outline-secondary"
                   style={{ fontSize: '0.72rem', padding: '1px 8px' }}
@@ -321,6 +380,14 @@ export default function CarDetail({ car, owned, onToggleOwned, onClose, onCarUpd
           >
             {owned ? '🚗 In Garage' : '+ Add to Garage'}
           </button>
+          {!owned && (
+            <button
+              className={`btn btn-sm ${wishlisted ? 'btn-info' : 'btn-outline-info'}`}
+              onClick={onToggleWishlisted}
+            >
+              {wishlisted ? '⭐ Wishlisted' : '⭐ Add to Wishlist'}
+            </button>
+          )}
           {car.base_value && car.auctionable && (
             <button
               className="btn btn-sm btn-outline-light copy-btn"

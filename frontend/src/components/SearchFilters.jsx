@@ -9,11 +9,12 @@ export default function SearchFilters({
   selectedManufacturer, onManufacturerChange,
   selectedAvailability, onAvailabilityChange,
   ownedOnly, onOwnedOnlyChange,
+  wishlistedOnly, onWishlistedOnlyChange,
   sortKey, onSortChange, sortOptions,
   filters,
   onClear,
 }) {
-  const hasFilters = query || selectedClass || selectedRarity || selectedManufacturer || selectedAvailability || ownedOnly !== null
+  const hasFilters = query || selectedClass || selectedRarity || selectedManufacturer || selectedAvailability || ownedOnly !== null || wishlistedOnly
 
   // Helper: use ComboBox for long lists, native <select> for short ones
   function FilterSelect({ value, onChange, options, placeholder, colClass }) {
@@ -114,6 +115,18 @@ export default function SearchFilters({
             <option value="">🚗 All Cars</option>
             <option value="owned">✅ Owned</option>
             <option value="not_owned">❌ Not Owned</option>
+          </select>
+        </div>
+
+        {/* Wishlist filter */}
+        <div className="col-6 col-sm-3 col-lg-2">
+          <select
+            className="form-select form-select-sm"
+            value={wishlistedOnly ? 'wishlisted' : ''}
+            onChange={e => onWishlistedOnlyChange(e.target.value === 'wishlisted')}
+          >
+            <option value="">⭐ All Cars</option>
+            <option value="wishlisted">⭐ Wishlist</option>
           </select>
         </div>
 

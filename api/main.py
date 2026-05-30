@@ -17,6 +17,7 @@ from flask_cors import CORS
 DATA_PATH = Path(__file__).parent.parent / "data" / "cars.json"
 PARTS_PATH = Path(__file__).parent.parent / "data" / "parts.json"
 GARAGE_PATH = Path(__file__).parent.parent / "data" / "garage.json"
+WISHLIST_PATH = Path(__file__).parent.parent / "data" / "wishlist.json"
 
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "*"}})
@@ -24,8 +25,11 @@ CORS(app, resources={r"/api/*": {"origins": "*"}})
 _cars: list[dict] | None = None
 _parts: list[dict] | None = None
 _garage: list[dict] | None = None
+_wishlist: list[dict] | None = None
+_last_queried_ordinal: int | None = None  # most recent by-ordinal telemetry hit
 _data_lock = threading.Lock()
 _garage_lock = threading.Lock()
+_wishlist_lock = threading.Lock()
 
 CLASS_ORDER = ["D", "C", "B", "A", "S1", "S2", "R"]
 
@@ -94,6 +98,31 @@ def _save_garage(garage: list[dict]) -> None:
         with os.fdopen(tmp_fd, "w", encoding="utf-8") as fh:
             fh.write(body)
         os.replace(tmp_path, GARAGE_PATH)
+    except Exception:
+        with contextlib.suppress(OSError):
+            os.unlink(tmp_path)
+        raise
+
+
+def load_wishlist() -> list[dict]:
+    global _wishlist
+    if _wishlist is None:
+        if WISHLIST_PATH.exists():
+            with WISHLIST_PATH.open() as f:
+                _wishlist = json.load(f)
+        else:
+            _wishlist = []
+    return _wishlist
+
+
+def _save_wishlist(wishlist: list[dict]) -> None:
+    """Atomically overwrite wishlist.json."""
+    body = json.dumps(wishlist, indent=2, ensure_ascii=False)
+    tmp_fd, tmp_path = tempfile.mkstemp(dir=WISHLIST_PATH.parent, suffix=".tmp")
+    try:
+        with os.fdopen(tmp_fd, "w", encoding="utf-8") as fh:
+            fh.write(body)
+        os.replace(tmp_path, WISHLIST_PATH)
     except Exception:
         with contextlib.suppress(OSError):
             os.unlink(tmp_path)
@@ -250,11 +279,15 @@ def get_car_by_ordinal(ordinal_id: int):
     Driving a car in Forza implies ownership, so if the car isn't already in
     the garage it's added automatically with source="telemetry".  The response
     includes a ``garage_updated`` flag so the caller can tell when this happens.
+    Also records this ordinal as the last-queried value for the Quick Assign UI.
     """
+    global _last_queried_ordinal
     cars = load_cars()
     car = next((c for c in cars if c.get("carordinalid") == ordinal_id), None)
     if car is None:
         return jsonify({"error": "No car mapped to that ordinal ID"}), 404
+
+    _last_queried_ordinal = ordinal_id
 
     garage_updated = False
     with _garage_lock:
@@ -265,6 +298,33 @@ def get_car_by_ordinal(ordinal_id: int):
             garage_updated = True
 
     return jsonify({**car, "garage_updated": garage_updated})
+
+
+@app.get("/api/telemetry/last-ordinal")
+def last_queried_ordinal():
+    """Return the most recently queried telemetry ordinal ID.
+
+    Used by the Quick Assign UI in CarDetail to offer one-click ordinal
+    assignment without manual entry.  The response includes which car the
+    ordinal is currently mapped to (if any) so the UI can disable the button
+    when the ordinal is already taken by a different car.
+
+    Returns ``{"ordinal_id": null}`` when no telemetry hit has been recorded
+    since the server started.
+    """
+    ordinal_id = _last_queried_ordinal
+    if ordinal_id is None:
+        return jsonify({"ordinal_id": None})
+
+    cars = load_cars()
+    owner = next((c for c in cars if c.get("carordinalid") == ordinal_id), None)
+    return jsonify(
+        {
+            "ordinal_id": ordinal_id,
+            "assigned_to_car_id": owner["id"] if owner else None,
+            "assigned_to_car_name": owner["full_name"] if owner else None,
+        }
+    )
 
 
 @app.get("/api/cars/<int:car_id>/auction")
@@ -417,6 +477,80 @@ def remove_from_garage(car_id: int):
         if len(garage) == before:
             return jsonify({"error": "Car not in garage"}), 404
         _save_garage(garage)
+
+    return jsonify({"removed": True, "car_id": car_id})
+
+
+# ---------------------------------------------------------------------------
+# Wishlist — cars the user wants but does not yet own
+# ---------------------------------------------------------------------------
+
+
+@app.get("/api/wishlist")
+def get_wishlist():
+    """Return the full wishlist with per-entry metadata."""
+    wishlist = load_wishlist()
+    car_ids = [e["car_id"] for e in wishlist]
+    return _etag_response({"entries": wishlist, "car_ids": car_ids})
+
+
+@app.post("/api/wishlist/sync")
+def sync_wishlist():
+    """Merge a client-side list of wishlisted car IDs into the server wishlist.
+
+    Accepts ``{"car_ids": [1, 2, 3]}``.  New IDs are added; existing entries
+    are left untouched.  Returns the full merged ``car_ids`` list.
+    """
+    body = request.get_json(silent=True)
+    if body is None or not isinstance(body.get("car_ids"), list):
+        return jsonify({"error": 'Request body must be {"car_ids": [int, ...]}'}), 400
+
+    valid_ids = {c["id"] for c in load_cars()}
+    incoming = {int(i) for i in body["car_ids"] if isinstance(i, int) and i in valid_ids}
+
+    with _wishlist_lock:
+        wishlist = load_wishlist()
+        existing_ids = {e["car_id"] for e in wishlist}
+        new_ids = incoming - existing_ids
+        if new_ids:
+            now = _now_iso()
+            for car_id in sorted(new_ids):
+                wishlist.append({"car_id": car_id, "added_at": now})
+            _save_wishlist(wishlist)
+        car_ids = [e["car_id"] for e in wishlist]
+
+    return jsonify({"car_ids": car_ids, "added": len(new_ids)})
+
+
+@app.post("/api/wishlist/<int:car_id>")
+def add_to_wishlist(car_id: int):
+    """Add a car to the wishlist (idempotent)."""
+    cars = load_cars()
+    if not any(c["id"] == car_id for c in cars):
+        return jsonify({"error": "Car not found"}), 404
+
+    with _wishlist_lock:
+        wishlist = load_wishlist()
+        existing = next((e for e in wishlist if e["car_id"] == car_id), None)
+        if existing:
+            return jsonify(existing), 200
+        entry = {"car_id": car_id, "added_at": _now_iso()}
+        wishlist.append(entry)
+        _save_wishlist(wishlist)
+
+    return jsonify(entry), 201
+
+
+@app.delete("/api/wishlist/<int:car_id>")
+def remove_from_wishlist(car_id: int):
+    """Remove a car from the wishlist."""
+    with _wishlist_lock:
+        wishlist = load_wishlist()
+        before = len(wishlist)
+        wishlist[:] = [e for e in wishlist if e["car_id"] != car_id]
+        if len(wishlist) == before:
+            return jsonify({"error": "Car not in wishlist"}), 404
+        _save_wishlist(wishlist)
 
     return jsonify({"removed": True, "car_id": car_id})
 

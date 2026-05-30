@@ -19,12 +19,12 @@ function formatCredits(val) {
   return val.toLocaleString('en-US') + ' CR'
 }
 
-export default function CarCard({ car, owned, onClick, onToggleOwned }) {
+export default function CarCard({ car, owned, wishlisted, onClick, onToggleOwned, onToggleWishlisted }) {
   const noAuction = !car.auctionable
 
   return (
     <div
-      className={`car-card p-3 h-100${owned ? ' car-card-owned' : ''}`}
+      className={`car-card p-3 h-100${owned ? ' car-card-owned' : wishlisted ? ' car-card-wishlisted' : ''}`}
       onClick={onClick}
       role="button"
       tabIndex={0}
@@ -59,6 +59,16 @@ export default function CarCard({ car, owned, onClick, onToggleOwned }) {
             <span title="Telemetry Ordinal ID" style={{ color: '#666', fontSize: '0.72rem', fontFamily: 'monospace' }}>
               #{car.carordinalid}
             </span>
+          )}
+          {!owned && (
+            <button
+              className={`wishlist-btn${wishlisted ? ' wishlist-btn-active' : ''}`}
+              title={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+              onClick={e => { e.stopPropagation(); onToggleWishlisted?.() }}
+              aria-pressed={wishlisted}
+            >
+              ⭐
+            </button>
           )}
           <button
             className={`garage-btn${owned ? ' garage-btn-owned' : ''}`}

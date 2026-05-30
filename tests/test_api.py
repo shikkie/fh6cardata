@@ -293,6 +293,76 @@ def test_search_by_ordinal(client, first_car_id):
 
 
 # ---------------------------------------------------------------------------
+# Telemetry last-ordinal — Quick Assign UI support
+# ---------------------------------------------------------------------------
+
+
+def test_last_ordinal_none_initially(client):
+    """Returns null ordinal_id when no by-ordinal hit has been recorded."""
+    import api.main as mod
+
+    original = mod._last_queried_ordinal
+    mod._last_queried_ordinal = None
+    try:
+        resp = client.get("/api/telemetry/last-ordinal")
+        assert resp.status_code == 200
+        data = json.loads(resp.data)
+        assert data["ordinal_id"] is None
+    finally:
+        mod._last_queried_ordinal = original
+
+
+def test_last_ordinal_unassigned(client):
+    """Returns the ordinal with assigned_to_car_id=None when not yet mapped."""
+    import api.main as mod
+
+    original = mod._last_queried_ordinal
+    mod._last_queried_ordinal = 987654  # not assigned to any car
+    try:
+        resp = client.get("/api/telemetry/last-ordinal")
+        assert resp.status_code == 200
+        data = json.loads(resp.data)
+        assert data["ordinal_id"] == 987654
+        assert data["assigned_to_car_id"] is None
+        assert data["assigned_to_car_name"] is None
+    finally:
+        mod._last_queried_ordinal = original
+
+
+def test_last_ordinal_assigned(client, first_car_id):
+    """Returns assignment info when the ordinal is mapped to a car."""
+    import api.main as mod
+
+    with patch("api.main._save_cars"):
+        client.patch(f"/api/cars/{first_car_id}", json={"carordinalid": 777001})
+        original = mod._last_queried_ordinal
+        mod._last_queried_ordinal = 777001
+        try:
+            resp = client.get("/api/telemetry/last-ordinal")
+            assert resp.status_code == 200
+            data = json.loads(resp.data)
+            assert data["ordinal_id"] == 777001
+            assert data["assigned_to_car_id"] == first_car_id
+            assert isinstance(data["assigned_to_car_name"], str)
+        finally:
+            mod._last_queried_ordinal = original
+            client.patch(f"/api/cars/{first_car_id}", json={"carordinalid": None})
+
+
+def test_by_ordinal_records_last_queried(client, first_car_id):
+    """A successful by-ordinal lookup updates _last_queried_ordinal."""
+    import api.main as mod
+
+    with patch("api.main._save_cars"):
+        client.patch(f"/api/cars/{first_car_id}", json={"carordinalid": 654321})
+        with patch("api.main._save_garage"):
+            client.get("/api/cars/by-ordinal/654321")
+        assert mod._last_queried_ordinal == 654321
+        # Clean up
+        client.patch(f"/api/cars/{first_car_id}", json={"carordinalid": None})
+
+
+# ---------------------------------------------------------------------------
 # Garage — owned car persistence
 # ---------------------------------------------------------------------------
 
@@ -397,3 +467,88 @@ def test_by_ordinal_implicit_garage(garage_client, first_car_id):
         assert entry["source"] == "telemetry"
         # Clean up ordinal
         garage_client.patch(f"/api/cars/{first_car_id}", json={"carordinalid": None})
+
+
+# ---------------------------------------------------------------------------
+# Wishlist — cars the user wants but does not yet own
+# ---------------------------------------------------------------------------
+
+
+@pytest.fixture()
+def wishlist_client(client):
+    """Client with an empty in-memory wishlist; _save_wishlist writes are mocked."""
+    import api.main as mod
+
+    original = mod._wishlist
+    mod._wishlist = []
+    with patch("api.main._save_wishlist"):
+        yield client
+    mod._wishlist = original
+
+
+def test_wishlist_empty(wishlist_client):
+    resp = wishlist_client.get("/api/wishlist")
+    assert resp.status_code == 200
+    data = json.loads(resp.data)
+    assert data["car_ids"] == []
+    assert data["entries"] == []
+
+
+def test_wishlist_add(wishlist_client):
+    resp = wishlist_client.post("/api/wishlist/1")
+    assert resp.status_code == 201
+    entry = json.loads(resp.data)
+    assert entry["car_id"] == 1
+    assert "added_at" in entry
+
+
+def test_wishlist_add_idempotent(wishlist_client):
+    """Adding the same car twice returns the existing entry, not a duplicate."""
+    wishlist_client.post("/api/wishlist/1")
+    resp = wishlist_client.post("/api/wishlist/1")
+    assert resp.status_code == 200
+    data = json.loads(wishlist_client.get("/api/wishlist").data)
+    assert data["car_ids"].count(1) == 1
+
+
+def test_wishlist_add_not_found(wishlist_client):
+    resp = wishlist_client.post("/api/wishlist/99999")
+    assert resp.status_code == 404
+
+
+def test_wishlist_remove(wishlist_client):
+    wishlist_client.post("/api/wishlist/1")
+    resp = wishlist_client.delete("/api/wishlist/1")
+    assert resp.status_code == 200
+    data = json.loads(resp.data)
+    assert data["removed"] is True
+    wl_data = json.loads(wishlist_client.get("/api/wishlist").data)
+    assert 1 not in wl_data["car_ids"]
+
+
+def test_wishlist_remove_not_in_wishlist(wishlist_client):
+    resp = wishlist_client.delete("/api/wishlist/1")
+    assert resp.status_code == 404
+
+
+def test_wishlist_sync_merges(wishlist_client):
+    """Sync uploads local IDs and merges with server state."""
+    wishlist_client.post("/api/wishlist/1")  # already on server
+    resp = wishlist_client.post("/api/wishlist/sync", json={"car_ids": [1, 2, 3]})
+    assert resp.status_code == 200
+    data = json.loads(resp.data)
+    assert set(data["car_ids"]) == {1, 2, 3}
+    assert data["added"] == 2  # 2 and 3 were new
+
+
+def test_wishlist_sync_empty_ids(wishlist_client):
+    resp = wishlist_client.post("/api/wishlist/sync", json={"car_ids": []})
+    assert resp.status_code == 200
+    data = json.loads(resp.data)
+    assert data["car_ids"] == []
+    assert data["added"] == 0
+
+
+def test_wishlist_sync_bad_body(wishlist_client):
+    resp = wishlist_client.post("/api/wishlist/sync", json={"wrong": "field"})
+    assert resp.status_code == 400

@@ -5,6 +5,7 @@ import CarGrid from './components/CarGrid.jsx'
 import UpdateBanner from './components/UpdateBanner.jsx'
 import useDebounce from './hooks/useDebounce.js'
 import useOwnedCars from './hooks/useOwnedCars.js'
+import useWishlistCars from './hooks/useWishlistCars.js'
 
 const API_BASE = '/api'
 
@@ -44,11 +45,19 @@ function App() {
   const [selectedManufacturer, setSelectedManufacturer] = useState('')
   const [selectedAvailability, setSelectedAvailability] = useState('')
   const [ownedOnly, setOwnedOnly] = useState(null) // null=all, true=owned, false=not owned
+  const [wishlistedOnly, setWishlistedOnly] = useState(false)
   const [sortKey, setSortKey] = useState('pi_desc')
   // Incrementing this triggers a cache-bypassing re-fetch (Approach 3: Refresh Data)
   const [dataRefreshCount, setDataRefreshCount] = useState(0)
 
   const { owned, toggleOwned, isOwned } = useOwnedCars()
+  const { toggleWishlisted, removeWishlisted, isWishlisted } = useWishlistCars()
+
+  // Adding a car to the garage clears its wishlist status.
+  function handleToggleOwned(id) {
+    if (!isOwned(id)) removeWishlisted(id)
+    toggleOwned(id)
+  }
 
   const debouncedQuery = useDebounce(query, 300)
 
@@ -94,13 +103,14 @@ function App() {
     setDataRefreshCount(c => c + 1)
   }
 
-  // Apply owned filter + sort client-side (owned lives in localStorage)
+  // Apply owned/wishlist filter + sort client-side (both live in localStorage)
   const displayCars = useMemo(() => {
     let result = cars
     if (ownedOnly === true)  result = result.filter(c => owned.has(c.id))
     if (ownedOnly === false) result = result.filter(c => !owned.has(c.id))
+    if (wishlistedOnly)      result = result.filter(c => isWishlisted(c.id))
     return sortCars(result, sortKey)
-  }, [cars, ownedOnly, owned, sortKey])
+  }, [cars, ownedOnly, owned, wishlistedOnly, isWishlisted, sortKey])
 
   function handleCarUpdate(updatedCar) {
     setCars(prev => prev.map(c => c.id === updatedCar.id ? updatedCar : c))
@@ -113,6 +123,7 @@ function App() {
     setSelectedManufacturer('')
     setSelectedAvailability('')
     setOwnedOnly(null)
+    setWishlistedOnly(false)
   }
 
   return (
@@ -134,6 +145,8 @@ function App() {
             onAvailabilityChange={setSelectedAvailability}
             ownedOnly={ownedOnly}
             onOwnedOnlyChange={setOwnedOnly}
+            wishlistedOnly={wishlistedOnly}
+            onWishlistedOnlyChange={setWishlistedOnly}
             sortKey={sortKey}
             onSortChange={setSortKey}
             sortOptions={SORT_OPTIONS}
@@ -141,7 +154,7 @@ function App() {
             onClear={clearFilters}
           />
         </div>
-        <CarGrid cars={displayCars} loading={loading} error={error} isOwned={isOwned} toggleOwned={toggleOwned} onCarUpdate={handleCarUpdate} />
+        <CarGrid cars={displayCars} loading={loading} error={error} isOwned={isOwned} toggleOwned={handleToggleOwned} isWishlisted={isWishlisted} toggleWishlisted={toggleWishlisted} onCarUpdate={handleCarUpdate} />
       </main>
     </>
   )
