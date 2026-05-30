@@ -18,6 +18,7 @@ DATA_PATH = Path(__file__).parent.parent / "data" / "cars.json"
 PARTS_PATH = Path(__file__).parent.parent / "data" / "parts.json"
 GARAGE_PATH = Path(__file__).parent.parent / "data" / "garage.json"
 WISHLIST_PATH = Path(__file__).parent.parent / "data" / "wishlist.json"
+LAST_ORDINAL_PATH = Path(__file__).parent.parent / "data" / "last_ordinal.json"
 
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "*"}})
@@ -26,10 +27,34 @@ _cars: list[dict] | None = None
 _parts: list[dict] | None = None
 _garage: list[dict] | None = None
 _wishlist: list[dict] | None = None
-_last_queried_ordinal: int | None = None  # most recent by-ordinal telemetry hit
 _data_lock = threading.Lock()
 _garage_lock = threading.Lock()
 _wishlist_lock = threading.Lock()
+
+
+def _load_last_ordinal() -> int | None:
+    """Read the persisted last-queried ordinal from disk (survives server restarts)."""
+    with contextlib.suppress(Exception):
+        if LAST_ORDINAL_PATH.exists():
+            return json.load(LAST_ORDINAL_PATH.open()).get("ordinal_id")
+    return None
+
+
+def _persist_last_ordinal(ordinal_id: int) -> None:
+    """Atomically write the last-queried ordinal to disk."""
+    body = json.dumps({"ordinal_id": ordinal_id})
+    tmp_fd, tmp_path = tempfile.mkstemp(dir=LAST_ORDINAL_PATH.parent, suffix=".tmp")
+    try:
+        with os.fdopen(tmp_fd, "w") as fh:
+            fh.write(body)
+        os.replace(tmp_path, LAST_ORDINAL_PATH)
+    except Exception:
+        with contextlib.suppress(OSError):
+            os.unlink(tmp_path)
+
+
+# Load persisted value at import time so it survives server restarts.
+_last_queried_ordinal: int | None = _load_last_ordinal()
 
 CLASS_ORDER = ["D", "C", "B", "A", "S1", "S2", "R"]
 
@@ -279,15 +304,19 @@ def get_car_by_ordinal(ordinal_id: int):
     Driving a car in Forza implies ownership, so if the car isn't already in
     the garage it's added automatically with source="telemetry".  The response
     includes a ``garage_updated`` flag so the caller can tell when this happens.
-    Also records this ordinal as the last-queried value for the Quick Assign UI.
+    Only records the ordinal as the last-queried value on 404 (unmapped ordinals)
+    so the Quick Assign UI always shows the most recent *unassigned* ordinal —
+    mapped-car hits would otherwise overwrite a pending ordinal the user wants to assign.
     """
-    global _last_queried_ordinal
     cars = load_cars()
     car = next((c for c in cars if c.get("carordinalid") == ordinal_id), None)
     if car is None:
+        # Only record unmapped ordinals — mapped ones don't need Quick Assign and
+        # would overwrite a pending unmapped ordinal that the user still wants to assign.
+        global _last_queried_ordinal
+        _last_queried_ordinal = ordinal_id
+        _persist_last_ordinal(ordinal_id)
         return jsonify({"error": "No car mapped to that ordinal ID"}), 404
-
-    _last_queried_ordinal = ordinal_id
 
     garage_updated = False
     with _garage_lock:

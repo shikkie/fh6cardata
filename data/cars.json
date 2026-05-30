@@ -3637,7 +3637,8 @@
       "braking": 10.0,
       "offroad": 4.9
     },
-    "image_url": "https://static.wikia.nocookie.net/forzamotorsport/images/b/b8/FH6_Ferrari_FXX-K_Evo.png/revision/latest/scale-to-width-down/320"
+    "image_url": "https://static.wikia.nocookie.net/forzamotorsport/images/b/b8/FH6_Ferrari_FXX-K_Evo.png/revision/latest/scale-to-width-down/320",
+    "carordinalid": null
   },
   {
     "id": 158,
@@ -13307,7 +13308,8 @@
       "braking": 3.2,
       "offroad": 5.2
     },
-    "image_url": "https://static.wikia.nocookie.net/forzamotorsport/images/9/9b/FH6_Toyota_86.png/revision/latest/scale-to-width-down/320"
+    "image_url": "https://static.wikia.nocookie.net/forzamotorsport/images/9/9b/FH6_Toyota_86.png/revision/latest/scale-to-width-down/320",
+    "carordinalid": 2007
   },
   {
     "id": 573,
@@ -13401,7 +13403,8 @@
     },
     "unlock_category": "Touge & Street Racing",
     "unlock_points": 250,
-    "image_url": "https://static.wikia.nocookie.net/forzamotorsport/images/e/eb/FH6_Toyota_Supra_RZ.png/revision/latest/scale-to-width-down/320"
+    "image_url": "https://static.wikia.nocookie.net/forzamotorsport/images/e/eb/FH6_Toyota_Supra_RZ.png/revision/latest/scale-to-width-down/320",
+    "carordinalid": null
   },
   {
     "id": 577,

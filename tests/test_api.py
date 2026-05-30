@@ -349,17 +349,38 @@ def test_last_ordinal_assigned(client, first_car_id):
             client.patch(f"/api/cars/{first_car_id}", json={"carordinalid": None})
 
 
-def test_by_ordinal_records_last_queried(client, first_car_id):
-    """A successful by-ordinal lookup updates _last_queried_ordinal."""
+def test_by_ordinal_does_not_record_last_queried_on_success(client, first_car_id):
+    """A successful by-ordinal lookup does NOT update _last_queried_ordinal.
+
+    Mapped cars don't need Quick Assign and would overwrite a pending unmapped
+    ordinal that the user still wants to assign to a different car.
+    """
     import api.main as mod
 
+    sentinel = 999888777
+    original = mod._last_queried_ordinal
+    mod._last_queried_ordinal = sentinel  # set a known value
     with patch("api.main._save_cars"):
         client.patch(f"/api/cars/{first_car_id}", json={"carordinalid": 654321})
         with patch("api.main._save_garage"):
-            client.get("/api/cars/by-ordinal/654321")
-        assert mod._last_queried_ordinal == 654321
+            resp = client.get("/api/cars/by-ordinal/654321")
+        assert resp.status_code == 200
+        assert mod._last_queried_ordinal == sentinel  # unchanged
         # Clean up
         client.patch(f"/api/cars/{first_car_id}", json={"carordinalid": None})
+    mod._last_queried_ordinal = original
+
+
+def test_by_ordinal_records_last_queried_on_404(client):
+    """A 404 by-ordinal hit still records the ordinal for Quick Assign."""
+    import api.main as mod
+
+    original = mod._last_queried_ordinal
+    with patch("api.main._persist_last_ordinal"):
+        resp = client.get("/api/cars/by-ordinal/111222333")
+    assert resp.status_code == 404
+    assert mod._last_queried_ordinal == 111222333
+    mod._last_queried_ordinal = original
 
 
 # ---------------------------------------------------------------------------
