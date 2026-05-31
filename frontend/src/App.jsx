@@ -46,6 +46,7 @@ function App() {
   const [selectedAvailability, setSelectedAvailability] = useState('')
   const [ownedOnly, setOwnedOnly] = useState(null) // null=all, true=owned, false=not owned
   const [wishlistedOnly, setWishlistedOnly] = useState(false)
+  const [ordinalFilter, setOrdinalFilter] = useState('') // ''=all, 'assigned'=has ordinal, 'unassigned'=no ordinal
   const [sortKey, setSortKey] = useState('pi_desc')
   // Incrementing this triggers a cache-bypassing re-fetch (Approach 3: Refresh Data)
   const [dataRefreshCount, setDataRefreshCount] = useState(0)
@@ -106,11 +107,13 @@ function App() {
   // Apply owned/wishlist filter + sort client-side (both live in localStorage)
   const displayCars = useMemo(() => {
     let result = cars
-    if (ownedOnly === true)  result = result.filter(c => owned.has(c.id))
-    if (ownedOnly === false) result = result.filter(c => !owned.has(c.id))
-    if (wishlistedOnly)      result = result.filter(c => isWishlisted(c.id))
+    if (ownedOnly === true)           result = result.filter(c => owned.has(c.id))
+    if (ownedOnly === false)          result = result.filter(c => !owned.has(c.id))
+    if (wishlistedOnly)               result = result.filter(c => isWishlisted(c.id))
+    if (ordinalFilter === 'assigned')   result = result.filter(c => c.carordinalid != null)
+    if (ordinalFilter === 'unassigned') result = result.filter(c => c.carordinalid == null)
     return sortCars(result, sortKey)
-  }, [cars, ownedOnly, owned, wishlistedOnly, isWishlisted, sortKey])
+  }, [cars, ownedOnly, owned, wishlistedOnly, isWishlisted, ordinalFilter, sortKey])
 
   function handleCarUpdate(updatedCar) {
     setCars(prev => prev.map(c => c.id === updatedCar.id ? updatedCar : c))
@@ -124,6 +127,7 @@ function App() {
     setSelectedAvailability('')
     setOwnedOnly(null)
     setWishlistedOnly(false)
+    setOrdinalFilter('')
   }
 
   return (
@@ -147,6 +151,8 @@ function App() {
             onOwnedOnlyChange={setOwnedOnly}
             wishlistedOnly={wishlistedOnly}
             onWishlistedOnlyChange={setWishlistedOnly}
+            ordinalFilter={ordinalFilter}
+            onOrdinalFilterChange={setOrdinalFilter}
             sortKey={sortKey}
             onSortChange={setSortKey}
             sortOptions={SORT_OPTIONS}

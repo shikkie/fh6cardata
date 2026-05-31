@@ -10,11 +10,12 @@ export default function SearchFilters({
   selectedAvailability, onAvailabilityChange,
   ownedOnly, onOwnedOnlyChange,
   wishlistedOnly, onWishlistedOnlyChange,
+  ordinalFilter, onOrdinalFilterChange,
   sortKey, onSortChange, sortOptions,
   filters,
   onClear,
 }) {
-  const hasFilters = query || selectedClass || selectedRarity || selectedManufacturer || selectedAvailability || ownedOnly !== null || wishlistedOnly
+  const hasFilters = query || selectedClass || selectedRarity || selectedManufacturer || selectedAvailability || ownedOnly !== null || wishlistedOnly || ordinalFilter
 
   // Helper: use ComboBox for long lists, native <select> for short ones
   function FilterSelect({ value, onChange, options, placeholder, colClass }) {
@@ -127,6 +128,19 @@ export default function SearchFilters({
           >
             <option value="">⭐ All Cars</option>
             <option value="wishlisted">⭐ Wishlist</option>
+          </select>
+        </div>
+
+        {/* Ordinal filter */}
+        <div className="col-6 col-sm-3 col-lg-2">
+          <select
+            className="form-select form-select-sm"
+            value={ordinalFilter}
+            onChange={e => onOrdinalFilterChange(e.target.value)}
+          >
+            <option value="">📡 All Ordinals</option>
+            <option value="assigned">📡 Ordinal Set</option>
+            <option value="unassigned">📡 No Ordinal</option>
           </select>
         </div>
 

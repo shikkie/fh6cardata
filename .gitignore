@@ -34,3 +34,8 @@ Thumbs.db
 
 # Generated at build time — do not commit
 frontend/public/version.json
+
+# Runtime data — local state, not part of source
+data/garage.json
+data/wishlist.json
+data/last_ordinal.json

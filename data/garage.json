@@ -308,5 +308,115 @@
     "car_id": 572,
     "added_at": "2026-05-30T10:16:50Z",
     "source": "telemetry"
+  },
+  {
+    "car_id": 526,
+    "added_at": "2026-05-30T10:21:44Z",
+    "source": "telemetry"
+  },
+  {
+    "car_id": 248,
+    "added_at": "2026-05-30T10:24:07Z",
+    "source": "telemetry"
+  },
+  {
+    "car_id": 615,
+    "added_at": "2026-05-30T10:30:59Z",
+    "source": "telemetry"
+  },
+  {
+    "car_id": 420,
+    "added_at": "2026-05-30T10:33:03Z",
+    "source": "telemetry"
+  },
+  {
+    "car_id": 554,
+    "added_at": "2026-05-30T10:34:25Z",
+    "source": "telemetry"
+  },
+  {
+    "car_id": 391,
+    "added_at": "2026-05-31T04:55:19Z",
+    "source": "telemetry"
+  },
+  {
+    "car_id": 366,
+    "added_at": "2026-05-31T07:09:24Z",
+    "source": "telemetry"
+  },
+  {
+    "car_id": 25,
+    "added_at": "2026-05-31T08:46:39Z",
+    "source": "telemetry"
+  },
+  {
+    "car_id": 226,
+    "added_at": "2026-05-31T08:58:34Z",
+    "source": "telemetry"
+  },
+  {
+    "car_id": 325,
+    "added_at": "2026-05-31T09:10:07Z",
+    "source": "telemetry"
+  },
+  {
+    "car_id": 322,
+    "added_at": "2026-05-31T09:10:50Z",
+    "source": "telemetry"
+  },
+  {
+    "car_id": 15,
+    "added_at": "2026-05-31T09:11:52Z",
+    "source": "telemetry"
+  },
+  {
+    "car_id": 38,
+    "added_at": "2026-05-31T09:12:18Z",
+    "source": "telemetry"
+  },
+  {
+    "car_id": 49,
+    "added_at": "2026-05-31T09:12:40Z",
+    "source": "telemetry"
+  },
+  {
+    "car_id": 5,
+    "added_at": "2026-05-31T09:13:29Z",
+    "source": "telemetry"
+  },
+  {
+    "car_id": 617,
+    "added_at": "2026-05-31T09:14:27Z",
+    "source": "telemetry"
+  },
+  {
+    "car_id": 50,
+    "added_at": "2026-05-31T09:14:49Z",
+    "source": "telemetry"
+  },
+  {
+    "car_id": 19,
+    "added_at": "2026-05-31T09:15:04Z",
+    "source": "telemetry"
+  },
+  {
+    "car_id": 614,
+    "added_at": "2026-05-31T09:15:21Z",
+    "source": "telemetry"
+  },
+  {
+    "car_id": 46,
+    "added_at": "2026-05-31T09:15:59Z",
+    "source": "telemetry"
+  },
+  {
+    "car_id": 12,
+    "added_at": "2026-05-31T09:16:18Z",
+    "source": "telemetry"
+  },
+  {
+    "car_id": 601,
+    "added_at": "2026-05-31T09:17:05Z",
+    "source": "telemetry"
   }
 ]
