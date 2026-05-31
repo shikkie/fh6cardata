@@ -8,6 +8,7 @@ A mobile-responsive PWA to quickly look up **Forza Horizon 6** car base values, 
 - 🏷️ **Filter** by class, rarity, manufacturer, availability, ordinal status, garage, wishlist
 - 💰 **Base value + estimated auction range** displayed prominently
 - 📡 **Telemetry ordinal mapping** — assign Data Out ordinal IDs to cars via quick-assign or manual edit
+  - Companion telemetry bridge: [forza-telemetry-fh6](https://github.com/shikkie/forza-telemetry-fh6)
 - 🚗 **Garage** tracking (localStorage + server-side JSON)
 - ⭐ **Wishlist** tracking
 - 📱 Mobile-first dark UI, installable as PWA
