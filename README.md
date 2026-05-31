@@ -1,14 +1,16 @@
 # FH6 Car Data — Auction House Companion
 
-A mobile-responsive web app to quickly look up **Forza Horizon 6** car base values and stats while sitting in the auction house — no need to quit the auction to check a car's price.
+A mobile-responsive PWA to quickly look up **Forza Horizon 6** car base values, stats, and telemetry ordinals — usable alongside the game without quitting the auction house.
 
 ## Features
 
-- 🔍 **Search** by make, model, or keyword
-- 🏷️ **Filter** by class (D/C/B/A/S1/S2/X), type, rarity, and manufacturer
-- 💰 **Base value** displayed prominently — see if a bid or buyout is a deal
-- 🚫 Barn Finds and Forza Edition cars flagged as non-auctionable
-- 📱 Mobile-first, dark UI optimised for use alongside the game
+- 🔍 **Search** by make, model, keyword, or ordinal ID
+- 🏷️ **Filter** by class, rarity, manufacturer, availability, ordinal status, garage, wishlist
+- 💰 **Base value + estimated auction range** displayed prominently
+- 📡 **Telemetry ordinal mapping** — assign Data Out ordinal IDs to cars via quick-assign or manual edit
+- 🚗 **Garage** tracking (localStorage + server-side JSON)
+- ⭐ **Wishlist** tracking
+- 📱 Mobile-first dark UI, installable as PWA
 
 ## Stack
 
@@ -16,48 +18,75 @@ A mobile-responsive web app to quickly look up **Forza Horizon 6** car base valu
 |-------|------|
 | Frontend | React 18 + Vite 5, Bootstrap 5 |
 | API | Python 3.11 + Flask 3 |
-| Data | JSON (scraped from Forza Fandom wiki) |
+| Data | `data/cars.json` (scraped from Forza Fandom wiki, ordinals added manually) |
 
 ## Quick Start
 
-### API
 ```bash
-pip install -r requirements.txt
-python -m api.main
-# API runs on http://localhost:5000
+# Start both API (port 5002) and frontend (port 3002)
+./run-dev.sh
+
+# Other commands
+./run-dev.sh restart    # restart running processes
+./run-dev.sh stop       # stop all
+./run-dev.sh status     # show PID / port info
 ```
 
-### Frontend
+Or start individually:
+
 ```bash
-cd frontend
-npm install
-npm run dev
-# Dev server on http://localhost:5173 (proxies /api → :5000)
+# API only
+pip install -r requirements.txt
+python -m api.main          # http://localhost:5002
+
+# Frontend only
+cd frontend && npm install && npm run dev   # http://localhost:3002
 ```
 
 ## Data
 
-Seed data is in `data/cars.json`. To refresh from the wiki:
+### Refreshing from the Fandom wiki
+
+The scraper fetches the car list via the MediaWiki API and **merges** it into the existing `data/cars.json` — it only appends genuinely new cars and never overwrites existing data (preserving ordinal mappings, image URLs, etc.).
+
 ```bash
-pip install -r requirements-dev.txt
+# Preview what's new without writing anything
+python scripts/scrape_wiki.py --dry-run
+
+# Merge new cars into data/cars.json
 python scripts/scrape_wiki.py
+
+# Full overwrite (destructive — loses ordinals/image_urls — use with care)
+python scripts/scrape_wiki.py --overwrite
 ```
 
-> The wiki may be behind Cloudflare; run the scraper from a browser environment or a residential IP if needed.
+Dependencies for the scraper: `pip install requests` (already in `requirements.txt`).
+
+### Pushing ordinal updates
+
+After assigning telemetry ordinals to cars in the UI, use the helper script to commit and push just `data/cars.json`:
+
+```bash
+./push-cars.sh                          # auto commit message with timestamp
+./push-cars.sh "map ordinals 141, 2007" # custom message
+```
 
 ## Development
 
 ```bash
-# Python tests
-pip install -r requirements-dev.txt
-pytest
+# Run all checks (lint + tests + frontend build)
+./run-tests.sh              # everything
+./run-tests.sh python       # Python only
+./run-tests.sh frontend     # frontend only
 
 # Python lint
-ruff check .
-ruff format .
+ruff check . && ruff format --check .
 
-# Frontend lint
-cd frontend && npm run lint
+# Python tests
+python3 -m pytest tests/ -q
+
+# Frontend lint + build
+cd frontend && npm run lint && npm run build
 ```
 
 ## Deployment
@@ -66,35 +95,28 @@ cd frontend && npm run lint
 
 iOS home-screen installs can cache the app shell for a long time.  This project uses four complementary mechanisms to ensure users always receive updates:
 
-1. **Service worker update polling** — the SW registration calls `registration.update()` every 5 minutes, forcing iOS Safari to check whether the SW file has changed.
-2. **In-app update banner** — when a new SW is waiting, a sticky banner appears with a "Refresh Now" button that reloads the app with the new code.
-3. **Version polling** — a `/version.json` file (generated at build time) is polled every 5 minutes via `useAppVersion`.  Because the SW serves it `NetworkOnly`, it is never cached and always reflects the latest build.
-4. **NetworkFirst for HTML navigation** — the app shell is re-fetched from the network on every navigation (with a 3 s timeout), so new JS/CSS bundles load immediately when online.
+1. **Service worker update polling** — the SW registration calls `registration.update()` every 5 minutes.
+2. **In-app update banner** — when a new SW is waiting, a sticky banner appears with a "Refresh Now" button.
+3. **Version polling** — `/version.json` (generated at build time) is polled every 5 minutes via `useAppVersion` and served `NetworkOnly` so it is never cached.
+4. **NetworkFirst for HTML navigation** — the app shell is re-fetched from the network on every navigation (3 s timeout).
 
 ### Deploying a new version
 
 ```bash
-# 1. Build the frontend (generates a new version.json automatically)
+# 1. Build the frontend
 cd frontend && npm run build
 
-# 2. Export the build version so Flask /api/version reflects it
+# 2. Export build version so Flask /api/version reflects it
 export FH6_BUILD_VERSION="$(date +%Y%m%d%H%M)"
 export FH6_BUILD_TIME="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
 # 3. Restart Flask
-systemctl restart fh6-api   # or however you manage it
+./run-dev.sh restart
 ```
 
-Users will see the "App update available" banner within 5 minutes of the next time they open the app.  Tapping **Refresh Now** applies the update instantly.
-
-## Roadmap
-
-See [GitHub Issues](https://github.com/shikkie/fh6cardata/issues) for planned work items, including:
-- Tuning parts data and stat ranges
-- Car detail/compare view
-- Offline PWA mode
-- Auto-refresh from wiki
+Users will see the "App update available" banner within 5 minutes and can tap **Refresh Now** to apply it instantly.
 
 ## License
 
 MIT
+

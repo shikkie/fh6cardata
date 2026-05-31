@@ -311,10 +311,41 @@ def parse_cars(wikitext: str) -> list[dict]:
     return cars
 
 
+def merge_cars(existing: list[dict], fresh: list[dict]) -> tuple[list[dict], list[dict]]:
+    """Merge wiki-scraped cars into the existing dataset.
+
+    Rules:
+    - Existing cars are kept exactly as-is (preserves carordinalid, image_url, any
+      manually-set fields).
+    - Cars found on the wiki that are not in the existing dataset are appended with
+      new sequential IDs continuing from max(existing id).
+    - Match key: normalised full_name (lowercase, stripped).
+
+    Returns (merged_list, new_cars).
+    """
+    existing_names = {c["full_name"].strip().lower() for c in existing}
+    next_id = max((c["id"] for c in existing), default=0) + 1
+
+    new_cars: list[dict] = []
+    for car in fresh:
+        if car["full_name"].strip().lower() not in existing_names:
+            car = dict(car)  # copy
+            car["id"] = next_id
+            next_id += 1
+            new_cars.append(car)
+
+    return existing + new_cars, new_cars
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Scrape FH6 car data from Fandom wiki")
     parser.add_argument(
         "--dry-run", action="store_true", help="Print summary only, don't write file"
+    )
+    parser.add_argument(
+        "--overwrite",
+        action="store_true",
+        help="Replace cars.json entirely instead of merging (loses ordinals/image_urls)",
     )
     parser.add_argument("--output", default=str(OUTPUT), help="Output JSON path")
     args = parser.parse_args()
@@ -323,29 +354,44 @@ def main() -> None:
     wikitext = fetch_wikitext()
     print(f"Wikitext length: {len(wikitext):,} chars")
 
-    cars = parse_cars(wikitext)
-    print(f"Parsed {len(cars)} cars.")
+    fresh_cars = parse_cars(wikitext)
+    print(f"Parsed {len(fresh_cars)} cars from wiki.")
 
-    # Summary by rarity
     from collections import Counter
 
-    rarity_counts = Counter(c["rarity"] for c in cars)
-    for rarity, count in sorted(rarity_counts.items(), key=lambda x: -x[1]):
-        print(f"  {rarity:18s} {count:3d}")
+    out_path = Path(args.output)
+
+    if args.overwrite or not out_path.exists():
+        result = fresh_cars
+        new_cars = fresh_cars
+    else:
+        existing = json.loads(out_path.read_text())
+        result, new_cars = merge_cars(existing, fresh_cars)
+
+    rarity_counts = Counter(c["rarity"] for c in new_cars)
+    if new_cars:
+        print(f"\n🆕 {len(new_cars)} new car(s) to add:")
+        for rarity, count in sorted(rarity_counts.items(), key=lambda x: -x[1]):
+            print(f"  {rarity:18s} {count:3d}")
+    else:
+        print("\n✅ No new cars — dataset is already up to date.")
 
     if args.dry_run:
-        print("\n-- Sample (first 3) --")
-        for c in cars[:3]:
-            print(json.dumps(c, indent=2))
+        if new_cars:
+            print("\n-- New cars --")
+            for c in new_cars:
+                print(f"  {c['full_name']}")
         print("\n(dry-run: no file written)")
         return
 
-    out_path = Path(args.output)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     with out_path.open("w") as f:
-        json.dump(cars, f, indent=2)
+        json.dump(result, f, indent=2)
 
-    print(f"\n✅ Written {len(cars)} cars → {out_path}")
+    if new_cars:
+        print(f"\n✅ Written {len(result)} cars ({len(new_cars)} added) → {out_path}")
+    else:
+        print(f"✅ {out_path} unchanged ({len(result)} cars).")
 
 
 if __name__ == "__main__":
