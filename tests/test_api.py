@@ -573,3 +573,46 @@ def test_wishlist_sync_empty_ids(wishlist_client):
 def test_wishlist_sync_bad_body(wishlist_client):
     resp = wishlist_client.post("/api/wishlist/sync", json={"wrong": "field"})
     assert resp.status_code == 400
+
+
+# ---------------------------------------------------------------------------
+# Discount settings
+# ---------------------------------------------------------------------------
+
+
+def test_discount_get_returns_defaults_when_missing(client, tmp_path):
+    import api.main as mod
+
+    original = mod._discount
+    original_path = mod.DISCOUNT_PATH
+    mod._discount = None
+    mod.DISCOUNT_PATH = tmp_path / "discount-test.json"
+    try:
+        with patch("api.main._save_discount"):
+            resp = client.get("/api/discount")
+        assert resp.status_code == 200
+        data = json.loads(resp.data)
+        assert data["enabled"] is False
+        assert data["percent"] == 5
+    finally:
+        mod._discount = original
+        mod.DISCOUNT_PATH = original_path
+
+
+def test_discount_put_updates_settings(client):
+    import api.main as mod
+
+    original = mod._discount
+    mod._discount = None
+    with patch("api.main._save_discount"):
+        resp = client.put("/api/discount", json={"enabled": True, "percent": 7.5})
+    assert resp.status_code == 200
+    data = json.loads(resp.data)
+    assert data["enabled"] is True
+    assert data["percent"] == 7.5
+    mod._discount = original
+
+
+def test_discount_put_rejects_invalid_percent(client):
+    resp = client.put("/api/discount", json={"enabled": True, "percent": 150})
+    assert resp.status_code == 422

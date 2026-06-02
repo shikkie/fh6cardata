@@ -50,6 +50,11 @@ function App() {
   const [sortKey, setSortKey] = useState('pi_desc')
   // Incrementing this triggers a cache-bypassing re-fetch (Approach 3: Refresh Data)
   const [dataRefreshCount, setDataRefreshCount] = useState(0)
+  const [settingsOpen, setSettingsOpen] = useState(false)
+  const [discountSettings, setDiscountSettings] = useState({ enabled: false, percent: 5 })
+  const [discountDraft, setDiscountDraft] = useState({ enabled: false, percent: 5 })
+  const [discountSaving, setDiscountSaving] = useState(false)
+  const [discountError, setDiscountError] = useState(null)
 
   const { owned, toggleOwned, isOwned } = useOwnedCars()
   const { toggleWishlisted, removeWishlisted, isWishlisted } = useWishlistCars()
@@ -68,6 +73,20 @@ function App() {
       .then(setFilters)
       .catch(() => {})
   }, [dataRefreshCount])   // re-fetch filters when user taps "Refresh Data"
+
+  useEffect(() => {
+    fetch(`${API_BASE}/discount`)
+      .then(r => r.ok ? r.json() : { enabled: false, percent: 5 })
+      .then(data => {
+        const normalized = {
+          enabled: Boolean(data?.enabled),
+          percent: Number.isFinite(data?.percent) ? Number(data.percent) : 5,
+        }
+        setDiscountSettings(normalized)
+        setDiscountDraft(normalized)
+      })
+      .catch(() => {})
+  }, [])
 
   const fetchCars = useCallback(() => {
     setLoading(true)
@@ -130,10 +149,54 @@ function App() {
     setOrdinalFilter('')
   }
 
+  function openSettings() {
+    setDiscountDraft(discountSettings)
+    setDiscountError(null)
+    setSettingsOpen(true)
+  }
+
+  function closeSettings() {
+    setSettingsOpen(false)
+    setDiscountError(null)
+  }
+
+  async function saveDiscountSettings() {
+    const percent = Number(discountDraft.percent)
+    if (!Number.isFinite(percent) || percent < 0 || percent > 100) {
+      setDiscountError('Discount percent must be between 0 and 100')
+      return
+    }
+    setDiscountSaving(true)
+    setDiscountError(null)
+    try {
+      const resp = await fetch(`${API_BASE}/discount`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ enabled: Boolean(discountDraft.enabled), percent }),
+      })
+      const data = await resp.json()
+      if (!resp.ok) {
+        setDiscountError(data?.error || 'Could not save discount settings')
+        return
+      }
+      setDiscountSettings(data)
+      setDiscountDraft(data)
+      setSettingsOpen(false)
+    } catch {
+      setDiscountError('Could not reach the API server')
+    } finally {
+      setDiscountSaving(false)
+    }
+  }
+
   return (
     <>
       <UpdateBanner />
-      <Navbar onRefreshData={handleRefreshData} />
+      <Navbar
+        onRefreshData={handleRefreshData}
+        onOpenSettings={openSettings}
+        discountSettings={discountSettings}
+      />
       <main className="container-fluid px-3 py-3">
         <div className="search-sticky mb-3">
           <SearchFilters
@@ -160,8 +223,66 @@ function App() {
             onClear={clearFilters}
           />
         </div>
-        <CarGrid cars={displayCars} loading={loading} error={error} isOwned={isOwned} toggleOwned={handleToggleOwned} isWishlisted={isWishlisted} toggleWishlisted={toggleWishlisted} onCarUpdate={handleCarUpdate} />
+        <CarGrid
+          cars={displayCars}
+          loading={loading}
+          error={error}
+          isOwned={isOwned}
+          toggleOwned={handleToggleOwned}
+          isWishlisted={isWishlisted}
+          toggleWishlisted={toggleWishlisted}
+          onCarUpdate={handleCarUpdate}
+          discountSettings={discountSettings}
+        />
       </main>
+      {settingsOpen && (
+        <div className="settings-backdrop" onClick={closeSettings} role="dialog" aria-modal="true" aria-label="Pricing settings">
+          <div className="settings-panel" onClick={e => e.stopPropagation()}>
+            <div className="d-flex justify-content-between align-items-center mb-3">
+              <h2 className="h6 mb-0 settings-title">Pricing Settings</h2>
+              <button className="btn-close btn-close-white settings-close" aria-label="Close" onClick={closeSettings} />
+            </div>
+
+            <div className="form-check form-switch mb-3 settings-switch-wrap">
+              <input
+                className="form-check-input settings-switch"
+                type="checkbox"
+                id="discountEnabled"
+                checked={Boolean(discountDraft.enabled)}
+                onChange={e => setDiscountDraft(prev => ({ ...prev, enabled: e.target.checked }))}
+              />
+              <label className="form-check-label settings-label" htmlFor="discountEnabled">
+                Enable autoshow discount display
+              </label>
+            </div>
+
+            <label htmlFor="discountPercent" className="form-label small settings-subtle mb-1">Discount Percent</label>
+            <div className="input-group input-group-sm mb-2">
+              <input
+                id="discountPercent"
+                type="number"
+                className="form-control settings-input"
+                min="0"
+                max="100"
+                step="0.1"
+                value={discountDraft.percent}
+                onChange={e => setDiscountDraft(prev => ({ ...prev, percent: e.target.value }))}
+              />
+              <span className="input-group-text settings-addon">%</span>
+            </div>
+            <div className="small settings-subtle mb-3">Default is 5% (in-game autoshow discount).</div>
+
+            {discountError && <div className="alert alert-danger py-2 mb-3 settings-error">{discountError}</div>}
+
+            <div className="d-flex gap-2 justify-content-end settings-actions">
+              <button className="btn btn-sm settings-btn settings-btn-cancel" onClick={closeSettings} disabled={discountSaving}>Cancel</button>
+              <button className="btn btn-sm settings-btn settings-btn-save" onClick={saveDiscountSettings} disabled={discountSaving}>
+                {discountSaving ? 'Saving...' : 'Save'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   )
 }

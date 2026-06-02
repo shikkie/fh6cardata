@@ -67,6 +67,23 @@ function formatCR(val) {
   return val.toLocaleString('en-US') + ' CR'
 }
 
+function hasAutoshow(availability) {
+  return /autoshow/i.test(availability || '')
+}
+
+function formatPercent(val) {
+  const n = Number(val)
+  if (!Number.isFinite(n)) return '5'
+  return n % 1 === 0 ? String(n) : n.toFixed(1)
+}
+
+function discountedValue(baseValue, percent) {
+  const n = Number(baseValue)
+  const p = Number(percent)
+  if (!Number.isFinite(n) || !Number.isFinite(p)) return null
+  return Math.round(n * (1 - (p / 100)))
+}
+
 function bidRange(car) {
   if (!car.auctionable || !car.base_value) return null
   const multipliers = {
@@ -81,11 +98,22 @@ function bidRange(car) {
   return { lo, hi }
 }
 
-export default function CarDetail({ car, owned, onToggleOwned, wishlisted, onToggleWishlisted, onClose, onCarUpdate }) {
+export default function CarDetail({
+  car,
+  owned,
+  onToggleOwned,
+  wishlisted,
+  onToggleWishlisted,
+  onClose,
+  onCarUpdate,
+  discountSettings,
+}) {
   const ref = useRef(null)
   const [activeTab, setActiveTab] = useState('info')
   const range = bidRange(car)
   const tags = availTags(car.availability)
+  const discountApplies = Boolean(discountSettings?.enabled) && hasAutoshow(car.availability) && Number(car.base_value) > 0
+  const autoshowPrice = discountApplies ? discountedValue(car.base_value, discountSettings?.percent) : null
 
   const [editingOrdinal, setEditingOrdinal] = useState(false)
   const [ordinalInput, setOrdinalInput] = useState('')
@@ -356,11 +384,20 @@ export default function CarDetail({ car, owned, onToggleOwned, wishlisted, onTog
             <span style={{ color: '#aaa', fontSize: '0.82rem' }}>Base Value</span>
             <span style={{ color: 'var(--fh6-accent)', fontWeight: 700 }}>{formatCR(car.base_value)}</span>
           </div>
+          {discountApplies && autoshowPrice && (
+            <div className="d-flex justify-content-between align-items-center mb-2">
+              <span style={{ color: '#aaa', fontSize: '0.82rem' }}>Autoshow ({formatPercent(discountSettings?.percent)}% off)</span>
+              <span style={{ color: '#8fe388', fontWeight: 700 }}>{formatCR(autoshowPrice)}</span>
+            </div>
+          )}
           {range && (
             <div className="d-flex justify-content-between align-items-center">
               <span style={{ color: '#aaa', fontSize: '0.82rem' }}>Est. Auction Range</span>
               <span style={{ color: '#f5f5f5', fontSize: '0.85rem' }}>{formatCR(range.lo)} – {formatCR(range.hi)}</span>
             </div>
+          )}
+          {Boolean(discountSettings?.enabled) && !hasAutoshow(car.availability) && (
+            <div style={{ color: '#888', fontSize: '0.78rem' }}>No autoshow source listed, so no discount applies.</div>
           )}
           {!car.auctionable && (
             <div style={{ color: '#888', fontSize: '0.82rem' }}><i className="fas fa-ban me-1" />Not auctionable</div>

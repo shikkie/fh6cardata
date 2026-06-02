@@ -31,6 +31,18 @@ body {
   letter-spacing: 0.05em;
 }
 
+.discount-status-chip {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #567f4f;
+  border-radius: 999px;
+  padding: 1px 8px;
+  color: #8fe388;
+  font-size: 0.68rem;
+  line-height: 1.2;
+  background: rgba(80, 128, 74, 0.2);
+}
+
 .search-bar input,
 .search-bar select {
   background-color: var(--fh6-surface2);
@@ -107,6 +119,21 @@ body {
   font-size: 1.1rem;
   font-weight: 700;
   color: var(--fh6-accent);
+}
+
+.base-value-old {
+  color: #808080;
+  text-decoration: line-through;
+  font-weight: 500;
+  font-size: 0.78rem;
+}
+
+.base-value-discount-note {
+  display: block;
+  color: #8fe388;
+  font-size: 0.68rem;
+  font-weight: 600;
+  line-height: 1.2;
 }
 
 .base-value.no-auction {
@@ -439,5 +466,146 @@ img.car-detail-hero {
   display: flex;
   align-items: center;
   justify-content: center;
+  opacity: 0.6;
+}
+
+/* Pricing settings dialog */
+.settings-backdrop {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at 50% 30%, rgba(240, 165, 0, 0.16), rgba(0, 0, 0, 0.82) 55%);
+  backdrop-filter: blur(2px);
+  z-index: 1060;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 16px;
+}
+
+.settings-panel {
+  width: 100%;
+  max-width: 420px;
+  background: linear-gradient(180deg, #2a2a2a 0%, #1f1f1f 100%);
+  border: 1px solid #4a4a4a;
+  border-top: 2px solid var(--fh6-accent);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45);
+}
+
+.settings-title {
+  color: var(--fh6-text);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.settings-close {
+  opacity: 0.65;
+}
+
+.settings-close:hover {
+  opacity: 1;
+}
+
+.settings-label {
+  color: var(--fh6-text);
+}
+
+.settings-subtle {
+  color: var(--fh6-muted) !important;
+}
+
+.settings-switch-wrap {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid #3a3a3a;
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.settings-switch-wrap.form-switch {
+  padding-left: 12px;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.settings-switch {
+  background-color: #3c3c3c;
+  border-color: #555;
+}
+
+.settings-switch-wrap .settings-switch {
+  margin-left: 0;
+  float: none;
+  flex-shrink: 0;
+}
+
+.settings-switch-wrap .settings-label {
+  margin-bottom: 0;
+}
+
+.settings-switch:focus {
+  box-shadow: 0 0 0 0.2rem rgba(240, 165, 0, 0.25);
+  border-color: var(--fh6-accent);
+}
+
+.settings-switch:checked {
+  background-color: var(--fh6-accent);
+  border-color: var(--fh6-accent);
+}
+
+.settings-input {
+  background-color: #161616 !important;
+  border: 1px solid #4d4d4d !important;
+  color: var(--fh6-text) !important;
+}
+
+.settings-input:focus {
+  border-color: var(--fh6-accent) !important;
+  box-shadow: 0 0 0 0.2rem rgba(240, 165, 0, 0.25) !important;
+}
+
+.settings-addon {
+  background-color: #2a2a2a !important;
+  border: 1px solid #4d4d4d !important;
+  color: var(--fh6-text) !important;
+}
+
+.settings-error {
+  border-color: #8b3131;
+  background: rgba(139, 49, 49, 0.2);
+  color: #ffb4b4;
+}
+
+.settings-btn {
+  min-width: 90px;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.settings-btn-cancel {
+  color: #d6d6d6;
+  background: transparent;
+  border: 1px solid #5a5a5a;
+}
+
+.settings-btn-cancel:hover {
+  color: #fff;
+  border-color: #7a7a7a;
+}
+
+.settings-btn-save {
+  color: #111;
+  background: var(--fh6-accent);
+  border: 1px solid #ffbe47;
+}
+
+.settings-btn-save:hover {
+  background: #ffb628;
+  border-color: #ffc75f;
+}
+
+.settings-btn:disabled {
   opacity: 0.6;
 }

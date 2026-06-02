@@ -2,7 +2,17 @@ import { useState } from 'react'
 import CarCard from './CarCard.jsx'
 import CarDetail from './CarDetail.jsx'
 
-export default function CarGrid({ cars, loading, error, isOwned, toggleOwned, isWishlisted, toggleWishlisted, onCarUpdate }) {
+export default function CarGrid({
+  cars,
+  loading,
+  error,
+  isOwned,
+  toggleOwned,
+  isWishlisted,
+  toggleWishlisted,
+  onCarUpdate,
+  discountSettings,
+}) {
   const [selected, setSelected] = useState(null)
 
   function handleCarUpdate(updatedCar) {
@@ -54,6 +64,7 @@ export default function CarGrid({ cars, loading, error, isOwned, toggleOwned, is
               onClick={() => setSelected(car)}
               onToggleOwned={() => toggleOwned(car.id)}
               onToggleWishlisted={() => toggleWishlisted(car.id)}
+              discountSettings={discountSettings}
             />
           </div>
         ))}
@@ -68,6 +79,7 @@ export default function CarGrid({ cars, loading, error, isOwned, toggleOwned, is
           onToggleWishlisted={() => toggleWishlisted(selected.id)}
           onClose={() => setSelected(null)}
           onCarUpdate={handleCarUpdate}
+          discountSettings={discountSettings}
         />
       )}
     </>

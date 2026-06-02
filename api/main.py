@@ -19,6 +19,7 @@ PARTS_PATH = Path(__file__).parent.parent / "data" / "parts.json"
 GARAGE_PATH = Path(__file__).parent.parent / "data" / "garage.json"
 WISHLIST_PATH = Path(__file__).parent.parent / "data" / "wishlist.json"
 LAST_ORDINAL_PATH = Path(__file__).parent.parent / "data" / "last_ordinal.json"
+DISCOUNT_PATH = Path(__file__).parent.parent / "data" / "discount.json"
 
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "*"}})
@@ -27,9 +28,13 @@ _cars: list[dict] | None = None
 _parts: list[dict] | None = None
 _garage: list[dict] | None = None
 _wishlist: list[dict] | None = None
+_discount: dict | None = None
 _data_lock = threading.Lock()
 _garage_lock = threading.Lock()
 _wishlist_lock = threading.Lock()
+_discount_lock = threading.Lock()
+
+DEFAULT_DISCOUNT = {"enabled": False, "percent": 5}
 
 
 def _load_last_ordinal() -> int | None:
@@ -148,6 +153,46 @@ def _save_wishlist(wishlist: list[dict]) -> None:
         with os.fdopen(tmp_fd, "w", encoding="utf-8") as fh:
             fh.write(body)
         os.replace(tmp_path, WISHLIST_PATH)
+    except Exception:
+        with contextlib.suppress(OSError):
+            os.unlink(tmp_path)
+        raise
+
+
+def _normalize_discount(data: dict | None) -> dict:
+    """Normalize discount payload to a safe persisted shape."""
+    if not isinstance(data, dict):
+        return DEFAULT_DISCOUNT.copy()
+    enabled = bool(data.get("enabled", DEFAULT_DISCOUNT["enabled"]))
+    raw_percent = data.get("percent", DEFAULT_DISCOUNT["percent"])
+    with contextlib.suppress(TypeError, ValueError):
+        percent = float(raw_percent)
+        if 0 <= percent <= 100:
+            return {"enabled": enabled, "percent": percent}
+    return {"enabled": enabled, "percent": DEFAULT_DISCOUNT["percent"]}
+
+
+def load_discount() -> dict:
+    global _discount
+    if _discount is None:
+        if DISCOUNT_PATH.exists():
+            with contextlib.suppress(Exception):
+                with DISCOUNT_PATH.open() as f:
+                    _discount = _normalize_discount(json.load(f))
+        if _discount is None:
+            _discount = DEFAULT_DISCOUNT.copy()
+            _save_discount(_discount)
+    return _discount
+
+
+def _save_discount(discount: dict) -> None:
+    """Atomically overwrite discount.json."""
+    body = json.dumps(discount, indent=2, ensure_ascii=False)
+    tmp_fd, tmp_path = tempfile.mkstemp(dir=DISCOUNT_PATH.parent, suffix=".tmp")
+    try:
+        with os.fdopen(tmp_fd, "w", encoding="utf-8") as fh:
+            fh.write(body)
+        os.replace(tmp_path, DISCOUNT_PATH)
     except Exception:
         with contextlib.suppress(OSError):
             os.unlink(tmp_path)
@@ -521,6 +566,40 @@ def get_wishlist():
     wishlist = load_wishlist()
     car_ids = [e["car_id"] for e in wishlist]
     return _etag_response({"entries": wishlist, "car_ids": car_ids})
+
+
+# ---------------------------------------------------------------------------
+# Discount settings — autoshow base value discount helper
+# ---------------------------------------------------------------------------
+
+
+@app.get("/api/discount")
+def get_discount():
+    with _discount_lock:
+        return jsonify(load_discount())
+
+
+@app.put("/api/discount")
+def put_discount():
+    body = request.get_json(silent=True)
+    if body is None:
+        return jsonify({"error": "Request body must be JSON"}), 400
+
+    enabled = body.get("enabled")
+    percent = body.get("percent")
+    if not isinstance(enabled, bool):
+        return jsonify({"error": "enabled must be a boolean"}), 422
+    if not isinstance(percent, (int, float)):
+        return jsonify({"error": "percent must be a number"}), 422
+    if not 0 <= float(percent) <= 100:
+        return jsonify({"error": "percent must be between 0 and 100"}), 422
+
+    discount = {"enabled": enabled, "percent": float(percent)}
+    with _discount_lock:
+        global _discount
+        _discount = discount
+        _save_discount(_discount)
+        return jsonify(_discount)
 
 
 @app.post("/api/wishlist/sync")

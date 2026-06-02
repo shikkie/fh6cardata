@@ -19,8 +19,35 @@ function formatCredits(val) {
   return val.toLocaleString('en-US') + ' CR'
 }
 
-export default function CarCard({ car, owned, wishlisted, onClick, onToggleOwned, onToggleWishlisted }) {
+function hasAutoshow(availability) {
+  return /autoshow/i.test(availability || '')
+}
+
+function discountedValue(baseValue, percent) {
+  const n = Number(baseValue)
+  const p = Number(percent)
+  if (!Number.isFinite(n) || !Number.isFinite(p)) return null
+  return Math.round(n * (1 - (p / 100)))
+}
+
+function formatPercent(val) {
+  const n = Number(val)
+  if (!Number.isFinite(n)) return '5'
+  return n % 1 === 0 ? String(n) : n.toFixed(1)
+}
+
+export default function CarCard({
+  car,
+  owned,
+  wishlisted,
+  onClick,
+  onToggleOwned,
+  onToggleWishlisted,
+  discountSettings,
+}) {
   const noAuction = !car.auctionable
+  const discountApplies = Boolean(discountSettings?.enabled) && hasAutoshow(car.availability) && Number(car.base_value) > 0
+  const discounted = discountApplies ? discountedValue(car.base_value, discountSettings?.percent) : null
 
   return (
     <div
@@ -52,7 +79,15 @@ export default function CarCard({ car, owned, wishlisted, onClick, onToggleOwned
       <div className="mt-2 d-flex justify-content-between align-items-center">
         {noAuction
           ? <span className="base-value no-auction"><i className="fas fa-ban me-1" />Not auctionable</span>
-          : <span className="base-value">{formatCredits(car.base_value) || '—'}</span>
+          : discountApplies && discounted
+            ? (
+              <span className="base-value">
+                <span className="base-value-old me-1">{formatCredits(car.base_value)}</span>
+                <span>{formatCredits(discounted)}</span>
+                <span className="base-value-discount-note">Autoshow -{formatPercent(discountSettings?.percent)}%</span>
+              </span>
+            )
+            : <span className="base-value">{formatCredits(car.base_value) || '—'}</span>
         }
         <div className="d-flex align-items-center gap-2">
           {car.carordinalid != null && (
