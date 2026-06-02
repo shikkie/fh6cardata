@@ -1,0 +1,28 @@
+{
+  "discount": {
+    "enabled": true,
+    "percent": 5.0
+  },
+  "auction_tiers": {
+    "Common": {
+      "min": 0.5,
+      "fair": 1.0,
+      "max": 1.5
+    },
+    "Rare": {
+      "min": 0.6,
+      "fair": 1.2,
+      "max": 1.8
+    },
+    "Epic": {
+      "min": 0.7,
+      "fair": 1.4,
+      "max": 2.0
+    },
+    "Legendary": {
+      "min": 0.8,
+      "fair": 1.6,
+      "max": 2.5
+    }
+  }
+}

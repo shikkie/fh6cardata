@@ -8,6 +8,16 @@ import useOwnedCars from './hooks/useOwnedCars.js'
 import useWishlistCars from './hooks/useWishlistCars.js'
 
 const API_BASE = '/api'
+const AUCTION_RARITIES = ['Common', 'Rare', 'Epic', 'Legendary']
+const DEFAULT_SETTINGS = {
+  discount: { enabled: false, percent: 5 },
+  auction_tiers: {
+    Common: { min: 0.5, fair: 1.0, max: 1.5 },
+    Rare: { min: 0.6, fair: 1.2, max: 1.8 },
+    Epic: { min: 0.7, fair: 1.4, max: 2.0 },
+    Legendary: { min: 0.8, fair: 1.6, max: 2.5 },
+  },
+}
 
 const SORT_OPTIONS = [
   { value: 'pi_desc',    label: 'PI ↓ High→Low' },
@@ -51,10 +61,10 @@ function App() {
   // Incrementing this triggers a cache-bypassing re-fetch (Approach 3: Refresh Data)
   const [dataRefreshCount, setDataRefreshCount] = useState(0)
   const [settingsOpen, setSettingsOpen] = useState(false)
-  const [discountSettings, setDiscountSettings] = useState({ enabled: false, percent: 5 })
-  const [discountDraft, setDiscountDraft] = useState({ enabled: false, percent: 5 })
-  const [discountSaving, setDiscountSaving] = useState(false)
-  const [discountError, setDiscountError] = useState(null)
+  const [appSettings, setAppSettings] = useState(DEFAULT_SETTINGS)
+  const [settingsDraft, setSettingsDraft] = useState(DEFAULT_SETTINGS)
+  const [settingsSaving, setSettingsSaving] = useState(false)
+  const [settingsError, setSettingsError] = useState(null)
 
   const { owned, toggleOwned, isOwned } = useOwnedCars()
   const { toggleWishlisted, removeWishlisted, isWishlisted } = useWishlistCars()
@@ -75,15 +85,30 @@ function App() {
   }, [dataRefreshCount])   // re-fetch filters when user taps "Refresh Data"
 
   useEffect(() => {
-    fetch(`${API_BASE}/discount`)
-      .then(r => r.ok ? r.json() : { enabled: false, percent: 5 })
+    fetch(`${API_BASE}/settings`)
+      .then(r => r.ok ? r.json() : DEFAULT_SETTINGS)
       .then(data => {
         const normalized = {
-          enabled: Boolean(data?.enabled),
-          percent: Number.isFinite(data?.percent) ? Number(data.percent) : 5,
+          discount: {
+            enabled: Boolean(data?.discount?.enabled),
+            percent: Number.isFinite(data?.discount?.percent) ? Number(data.discount.percent) : 5,
+          },
+          auction_tiers: Object.fromEntries(
+            AUCTION_RARITIES.map(rarity => {
+              const tier = data?.auction_tiers?.[rarity]
+              return [
+                rarity,
+                {
+                  min: Number.isFinite(tier?.min) ? Number(tier.min) : DEFAULT_SETTINGS.auction_tiers[rarity].min,
+                  fair: Number.isFinite(tier?.fair) ? Number(tier.fair) : DEFAULT_SETTINGS.auction_tiers[rarity].fair,
+                  max: Number.isFinite(tier?.max) ? Number(tier.max) : DEFAULT_SETTINGS.auction_tiers[rarity].max,
+                },
+              ]
+            })
+          ),
         }
-        setDiscountSettings(normalized)
-        setDiscountDraft(normalized)
+        setAppSettings(normalized)
+        setSettingsDraft(normalized)
       })
       .catch(() => {})
   }, [])
@@ -150,42 +175,72 @@ function App() {
   }
 
   function openSettings() {
-    setDiscountDraft(discountSettings)
-    setDiscountError(null)
+    setSettingsDraft(appSettings)
+    setSettingsError(null)
     setSettingsOpen(true)
   }
 
   function closeSettings() {
     setSettingsOpen(false)
-    setDiscountError(null)
+    setSettingsError(null)
   }
 
-  async function saveDiscountSettings() {
-    const percent = Number(discountDraft.percent)
+  async function saveAppSettings() {
+    const percent = Number(settingsDraft.discount?.percent)
     if (!Number.isFinite(percent) || percent < 0 || percent > 100) {
-      setDiscountError('Discount percent must be between 0 and 100')
+      setSettingsError('Discount percent must be between 0 and 100')
       return
     }
-    setDiscountSaving(true)
-    setDiscountError(null)
+
+    for (const rarity of AUCTION_RARITIES) {
+      const tier = settingsDraft.auction_tiers?.[rarity]
+      const min = Number(tier?.min)
+      const max = Number(tier?.max)
+      if (!Number.isFinite(min) || !Number.isFinite(max) || min <= 0 || max <= 0) {
+        setSettingsError(`${rarity} min/max multipliers must be numbers > 0`)
+        return
+      }
+      if (min > max) {
+        setSettingsError(`${rarity} min multiplier cannot be greater than max`)
+        return
+      }
+    }
+
+    setSettingsSaving(true)
+    setSettingsError(null)
     try {
-      const resp = await fetch(`${API_BASE}/discount`, {
+      const payload = {
+        discount: {
+          enabled: Boolean(settingsDraft.discount?.enabled),
+          percent,
+        },
+        auction_tiers: Object.fromEntries(
+          AUCTION_RARITIES.map(rarity => {
+            const tier = settingsDraft.auction_tiers[rarity]
+            const min = Number(tier.min)
+            const max = Number(tier.max)
+            return [rarity, { min, fair: Number(((min + max) / 2).toFixed(2)), max }]
+          })
+        ),
+      }
+
+      const resp = await fetch(`${API_BASE}/settings`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ enabled: Boolean(discountDraft.enabled), percent }),
+        body: JSON.stringify(payload),
       })
       const data = await resp.json()
       if (!resp.ok) {
-        setDiscountError(data?.error || 'Could not save discount settings')
+        setSettingsError(data?.error || 'Could not save settings')
         return
       }
-      setDiscountSettings(data)
-      setDiscountDraft(data)
+      setAppSettings(data)
+      setSettingsDraft(data)
       setSettingsOpen(false)
     } catch {
-      setDiscountError('Could not reach the API server')
+      setSettingsError('Could not reach the API server')
     } finally {
-      setDiscountSaving(false)
+      setSettingsSaving(false)
     }
   }
 
@@ -195,7 +250,7 @@ function App() {
       <Navbar
         onRefreshData={handleRefreshData}
         onOpenSettings={openSettings}
-        discountSettings={discountSettings}
+        discountSettings={appSettings.discount}
       />
       <main className="container-fluid px-3 py-3">
         <div className="search-sticky mb-3">
@@ -232,7 +287,7 @@ function App() {
           isWishlisted={isWishlisted}
           toggleWishlisted={toggleWishlisted}
           onCarUpdate={handleCarUpdate}
-          discountSettings={discountSettings}
+          appSettings={appSettings}
         />
       </main>
       {settingsOpen && (
@@ -248,8 +303,11 @@ function App() {
                 className="form-check-input settings-switch"
                 type="checkbox"
                 id="discountEnabled"
-                checked={Boolean(discountDraft.enabled)}
-                onChange={e => setDiscountDraft(prev => ({ ...prev, enabled: e.target.checked }))}
+                checked={Boolean(settingsDraft.discount?.enabled)}
+                onChange={e => setSettingsDraft(prev => ({
+                  ...prev,
+                  discount: { ...prev.discount, enabled: e.target.checked },
+                }))}
               />
               <label className="form-check-label settings-label" htmlFor="discountEnabled">
                 Enable autoshow discount display
@@ -265,19 +323,75 @@ function App() {
                 min="0"
                 max="100"
                 step="0.1"
-                value={discountDraft.percent}
-                onChange={e => setDiscountDraft(prev => ({ ...prev, percent: e.target.value }))}
+                value={settingsDraft.discount?.percent}
+                onChange={e => setSettingsDraft(prev => ({
+                  ...prev,
+                  discount: { ...prev.discount, percent: e.target.value },
+                }))}
               />
               <span className="input-group-text settings-addon">%</span>
             </div>
             <div className="small settings-subtle mb-3">Default is 5% (in-game autoshow discount).</div>
 
-            {discountError && <div className="alert alert-danger py-2 mb-3 settings-error">{discountError}</div>}
+            <div className="settings-divider mb-3" />
+            <div className="settings-subheading mb-2">Auction Range Multipliers</div>
+            <div className="small settings-subtle mb-2">Applied to effective base value after autoshow discount.</div>
+            <div className="settings-tier-grid mb-3">
+              {AUCTION_RARITIES.map(rarity => (
+                <div className="settings-tier-row" key={rarity}>
+                  <div className="settings-tier-label">{rarity}</div>
+                  <div className="settings-tier-inputs">
+                    <div className="input-group input-group-sm">
+                      <span className="input-group-text settings-addon settings-addon-mini">Min</span>
+                      <input
+                        type="number"
+                        className="form-control settings-input"
+                        min="0.01"
+                        step="0.01"
+                        value={settingsDraft.auction_tiers?.[rarity]?.min ?? ''}
+                        onChange={e => setSettingsDraft(prev => ({
+                          ...prev,
+                          auction_tiers: {
+                            ...prev.auction_tiers,
+                            [rarity]: {
+                              ...prev.auction_tiers[rarity],
+                              min: e.target.value,
+                            },
+                          },
+                        }))}
+                      />
+                    </div>
+                    <div className="input-group input-group-sm">
+                      <span className="input-group-text settings-addon settings-addon-mini">Max</span>
+                      <input
+                        type="number"
+                        className="form-control settings-input"
+                        min="0.01"
+                        step="0.01"
+                        value={settingsDraft.auction_tiers?.[rarity]?.max ?? ''}
+                        onChange={e => setSettingsDraft(prev => ({
+                          ...prev,
+                          auction_tiers: {
+                            ...prev.auction_tiers,
+                            [rarity]: {
+                              ...prev.auction_tiers[rarity],
+                              max: e.target.value,
+                            },
+                          },
+                        }))}
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {settingsError && <div className="alert alert-danger py-2 mb-3 settings-error">{settingsError}</div>}
 
             <div className="d-flex gap-2 justify-content-end settings-actions">
-              <button className="btn btn-sm settings-btn settings-btn-cancel" onClick={closeSettings} disabled={discountSaving}>Cancel</button>
-              <button className="btn btn-sm settings-btn settings-btn-save" onClick={saveDiscountSettings} disabled={discountSaving}>
-                {discountSaving ? 'Saving...' : 'Save'}
+              <button className="btn btn-sm settings-btn settings-btn-cancel" onClick={closeSettings} disabled={settingsSaving}>Cancel</button>
+              <button className="btn btn-sm settings-btn settings-btn-save" onClick={saveAppSettings} disabled={settingsSaving}>
+                {settingsSaving ? 'Saving...' : 'Save'}
               </button>
             </div>
           </div>

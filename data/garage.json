@@ -883,5 +883,10 @@
     "car_id": 106,
     "added_at": "2026-06-02T01:54:47Z",
     "source": "manual"
+  },
+  {
+    "car_id": 141,
+    "added_at": "2026-06-02T02:23:28Z",
+    "source": "manual"
   }
 ]

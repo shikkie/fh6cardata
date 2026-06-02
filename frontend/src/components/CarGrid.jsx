@@ -11,7 +11,7 @@ export default function CarGrid({
   isWishlisted,
   toggleWishlisted,
   onCarUpdate,
-  discountSettings,
+  appSettings,
 }) {
   const [selected, setSelected] = useState(null)
 
@@ -64,7 +64,7 @@ export default function CarGrid({
               onClick={() => setSelected(car)}
               onToggleOwned={() => toggleOwned(car.id)}
               onToggleWishlisted={() => toggleWishlisted(car.id)}
-              discountSettings={discountSettings}
+              discountSettings={appSettings?.discount}
             />
           </div>
         ))}
@@ -79,7 +79,7 @@ export default function CarGrid({
           onToggleWishlisted={() => toggleWishlisted(selected.id)}
           onClose={() => setSelected(null)}
           onCarUpdate={handleCarUpdate}
-          discountSettings={discountSettings}
+          appSettings={appSettings}
         />
       )}
     </>

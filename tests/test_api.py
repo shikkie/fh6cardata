@@ -576,43 +576,91 @@ def test_wishlist_sync_bad_body(wishlist_client):
 
 
 # ---------------------------------------------------------------------------
-# Discount settings
+# App settings
 # ---------------------------------------------------------------------------
 
 
-def test_discount_get_returns_defaults_when_missing(client, tmp_path):
+def test_settings_get_returns_defaults_when_missing(client, tmp_path):
     import api.main as mod
 
-    original = mod._discount
-    original_path = mod.DISCOUNT_PATH
-    mod._discount = None
-    mod.DISCOUNT_PATH = tmp_path / "discount-test.json"
+    original = mod._settings
+    original_path = mod.SETTINGS_PATH
+    mod._settings = None
+    mod.SETTINGS_PATH = tmp_path / "settings-test.json"
     try:
-        with patch("api.main._save_discount"):
-            resp = client.get("/api/discount")
+        with patch("api.main._save_settings"):
+            resp = client.get("/api/settings")
         assert resp.status_code == 200
         data = json.loads(resp.data)
-        assert data["enabled"] is False
-        assert data["percent"] == 5
+        assert data["discount"]["enabled"] is False
+        assert data["discount"]["percent"] == 5
+        assert "auction_tiers" in data
+        assert "Rare" in data["auction_tiers"]
     finally:
-        mod._discount = original
-        mod.DISCOUNT_PATH = original_path
+        mod._settings = original
+        mod.SETTINGS_PATH = original_path
 
 
-def test_discount_put_updates_settings(client):
+def test_settings_put_updates_settings(client):
     import api.main as mod
 
-    original = mod._discount
-    mod._discount = None
-    with patch("api.main._save_discount"):
-        resp = client.put("/api/discount", json={"enabled": True, "percent": 7.5})
+    original = mod._settings
+    mod._settings = None
+    payload = {
+        "discount": {"enabled": True, "percent": 7.5},
+        "auction_tiers": {
+            "Common": {"min": 0.5, "max": 1.6},
+            "Rare": {"min": 0.6, "max": 1.9},
+            "Epic": {"min": 0.7, "max": 2.1},
+            "Legendary": {"min": 0.8, "max": 2.6},
+        },
+    }
+    with patch("api.main._save_settings"):
+        resp = client.put("/api/settings", json=payload)
     assert resp.status_code == 200
     data = json.loads(resp.data)
-    assert data["enabled"] is True
-    assert data["percent"] == 7.5
-    mod._discount = original
+    assert data["discount"]["enabled"] is True
+    assert data["discount"]["percent"] == 7.5
+    assert data["auction_tiers"]["Rare"]["max"] == 1.9
+    mod._settings = original
 
 
-def test_discount_put_rejects_invalid_percent(client):
-    resp = client.put("/api/discount", json={"enabled": True, "percent": 150})
+def test_settings_put_rejects_invalid_percent(client):
+    payload = {
+        "discount": {"enabled": True, "percent": 150},
+        "auction_tiers": {
+            "Common": {"min": 0.5, "max": 1.6},
+            "Rare": {"min": 0.6, "max": 1.9},
+            "Epic": {"min": 0.7, "max": 2.1},
+            "Legendary": {"min": 0.8, "max": 2.6},
+        },
+    }
+    resp = client.put("/api/settings", json=payload)
     assert resp.status_code == 422
+
+
+def test_auction_endpoint_uses_discounted_autoshow_base(client):
+    """Auction range uses discounted base value when autoshow + discount enabled."""
+    import api.main as mod
+
+    original = mod._settings
+    cars = json.loads(client.get("/api/cars?auctionable=true").data)
+    car = next(
+        (c for c in cars if c.get("base_value") and "autoshow" in c.get("availability", "").lower()),
+        None,
+    )
+    assert car is not None
+
+    mod._settings = {
+        "discount": {"enabled": True, "percent": 10.0},
+        "auction_tiers": mod.DEFAULT_AUCTION_TIERS,
+    }
+    resp = client.get(f"/api/cars/{car['id']}/auction")
+    assert resp.status_code == 200
+    data = json.loads(resp.data)
+    expected_effective = round(car["base_value"] * 0.9 / 1000) * 1000
+    expected_min = round((car["base_value"] * 0.9) * mod.DEFAULT_AUCTION_TIERS[car["rarity"]]["min"] / 1000) * 1000
+    assert data["discount_applied"] is True
+    assert data["effective_base_value"] == expected_effective
+    assert data["min_bid"] == expected_min
+    mod._settings = original

@@ -19,7 +19,8 @@ PARTS_PATH = Path(__file__).parent.parent / "data" / "parts.json"
 GARAGE_PATH = Path(__file__).parent.parent / "data" / "garage.json"
 WISHLIST_PATH = Path(__file__).parent.parent / "data" / "wishlist.json"
 LAST_ORDINAL_PATH = Path(__file__).parent.parent / "data" / "last_ordinal.json"
-DISCOUNT_PATH = Path(__file__).parent.parent / "data" / "discount.json"
+SETTINGS_PATH = Path(__file__).parent.parent / "data" / "settings.json"
+LEGACY_DISCOUNT_PATH = Path(__file__).parent.parent / "data" / "discount.json"
 
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "*"}})
@@ -28,13 +29,23 @@ _cars: list[dict] | None = None
 _parts: list[dict] | None = None
 _garage: list[dict] | None = None
 _wishlist: list[dict] | None = None
-_discount: dict | None = None
+_settings: dict | None = None
 _data_lock = threading.Lock()
 _garage_lock = threading.Lock()
 _wishlist_lock = threading.Lock()
-_discount_lock = threading.Lock()
+_settings_lock = threading.Lock()
 
-DEFAULT_DISCOUNT = {"enabled": False, "percent": 5}
+DEFAULT_AUCTION_TIERS = {
+    "Common": {"min": 0.50, "fair": 1.00, "max": 1.50},
+    "Rare": {"min": 0.60, "fair": 1.20, "max": 1.80},
+    "Epic": {"min": 0.70, "fair": 1.40, "max": 2.00},
+    "Legendary": {"min": 0.80, "fair": 1.60, "max": 2.50},
+}
+
+DEFAULT_SETTINGS = {
+    "discount": {"enabled": False, "percent": 5.0},
+    "auction_tiers": DEFAULT_AUCTION_TIERS,
+}
 
 
 def _load_last_ordinal() -> int | None:
@@ -63,20 +74,28 @@ _last_queried_ordinal: int | None = _load_last_ordinal()
 
 CLASS_ORDER = ["D", "C", "B", "A", "S1", "S2", "R"]
 
-# Auction bid range multipliers per rarity (min_bid, fair_buyout, max_buyout)
-# Based on FH6 auction house observed pricing patterns
-AUCTION_TIERS: dict[str, dict] = {
-    "Common": {"min": 0.50, "fair": 1.00, "max": 1.50},
-    "Rare": {"min": 0.60, "fair": 1.20, "max": 1.80},
-    "Epic": {"min": 0.70, "fair": 1.40, "max": 2.00},
-    "Legendary": {"min": 0.80, "fair": 1.60, "max": 2.50},
-}
-
 CR_ROUND = 1_000  # round to nearest 1000 CR
 
 
 def _round_cr(val: float) -> int:
     return round(val / CR_ROUND) * CR_ROUND
+
+
+def _has_autoshow_source(car: dict) -> bool:
+    return "autoshow" in (car.get("availability") or "").lower()
+
+
+def _effective_base_value(car: dict, settings: dict) -> float | None:
+    """Return base value adjusted by autoshow discount when applicable."""
+    base = car.get("base_value")
+    if not base:
+        return None
+    value = float(base)
+    discount = settings.get("discount", {}) if isinstance(settings, dict) else {}
+    if bool(discount.get("enabled")) and _has_autoshow_source(car):
+        percent = float(discount.get("percent", 0))
+        value = value * (1 - (percent / 100.0))
+    return value
 
 
 def load_cars() -> list[dict]:
@@ -160,39 +179,100 @@ def _save_wishlist(wishlist: list[dict]) -> None:
 
 
 def _normalize_discount(data: dict | None) -> dict:
-    """Normalize discount payload to a safe persisted shape."""
+    """Normalize discount settings payload."""
     if not isinstance(data, dict):
-        return DEFAULT_DISCOUNT.copy()
-    enabled = bool(data.get("enabled", DEFAULT_DISCOUNT["enabled"]))
-    raw_percent = data.get("percent", DEFAULT_DISCOUNT["percent"])
+        return DEFAULT_SETTINGS["discount"].copy()
+    enabled = bool(data.get("enabled", DEFAULT_SETTINGS["discount"]["enabled"]))
+    raw_percent = data.get("percent", DEFAULT_SETTINGS["discount"]["percent"])
     with contextlib.suppress(TypeError, ValueError):
         percent = float(raw_percent)
         if 0 <= percent <= 100:
             return {"enabled": enabled, "percent": percent}
-    return {"enabled": enabled, "percent": DEFAULT_DISCOUNT["percent"]}
+    return {"enabled": enabled, "percent": DEFAULT_SETTINGS["discount"]["percent"]}
 
 
-def load_discount() -> dict:
-    global _discount
-    if _discount is None:
-        if DISCOUNT_PATH.exists():
+def _normalize_auction_tiers(data: dict | None) -> dict:
+    """Normalize auction tier multipliers per rarity."""
+    out: dict[str, dict[str, float]] = {}
+    for rarity, defaults in DEFAULT_AUCTION_TIERS.items():
+        tier = data.get(rarity) if isinstance(data, dict) else None
+        min_val = defaults["min"]
+        fair_val = defaults["fair"]
+        max_val = defaults["max"]
+
+        if isinstance(tier, dict):
+            with contextlib.suppress(TypeError, ValueError):
+                n = float(tier.get("min"))
+                if n > 0:
+                    min_val = n
+            with contextlib.suppress(TypeError, ValueError):
+                n = float(tier.get("max"))
+                if n > 0:
+                    max_val = n
+            with contextlib.suppress(TypeError, ValueError):
+                n = float(tier.get("fair"))
+                if n > 0:
+                    fair_val = n
+
+        if max_val < min_val:
+            min_val, max_val = max_val, min_val
+        if not (min_val <= fair_val <= max_val):
+            fair_val = round((min_val + max_val) / 2, 2)
+
+        out[rarity] = {"min": min_val, "fair": fair_val, "max": max_val}
+    return out
+
+
+def _normalize_settings(data: dict | None) -> dict:
+    """Normalize persisted settings to canonical shape."""
+    if not isinstance(data, dict):
+        return {
+            "discount": DEFAULT_SETTINGS["discount"].copy(),
+            "auction_tiers": _normalize_auction_tiers(None),
+        }
+    return {
+        "discount": _normalize_discount(data.get("discount")),
+        "auction_tiers": _normalize_auction_tiers(data.get("auction_tiers")),
+    }
+
+
+def load_settings() -> dict:
+    global _settings
+    if _settings is None:
+        if SETTINGS_PATH.exists():
             with contextlib.suppress(Exception):
-                with DISCOUNT_PATH.open() as f:
-                    _discount = _normalize_discount(json.load(f))
-        if _discount is None:
-            _discount = DEFAULT_DISCOUNT.copy()
-            _save_discount(_discount)
-    return _discount
+                with SETTINGS_PATH.open() as f:
+                    _settings = _normalize_settings(json.load(f))
+
+        # One-time legacy migration from discount.json.
+        if _settings is None and LEGACY_DISCOUNT_PATH.exists():
+            with contextlib.suppress(Exception):
+                with LEGACY_DISCOUNT_PATH.open() as f:
+                    legacy_discount = _normalize_discount(json.load(f))
+                    _settings = {
+                        "discount": legacy_discount,
+                        "auction_tiers": _normalize_auction_tiers(None),
+                    }
+
+        if _settings is None:
+            _settings = {
+                "discount": DEFAULT_SETTINGS["discount"].copy(),
+                "auction_tiers": _normalize_auction_tiers(None),
+            }
+
+        _save_settings(_settings)
+
+    return _settings
 
 
-def _save_discount(discount: dict) -> None:
-    """Atomically overwrite discount.json."""
-    body = json.dumps(discount, indent=2, ensure_ascii=False)
-    tmp_fd, tmp_path = tempfile.mkstemp(dir=DISCOUNT_PATH.parent, suffix=".tmp")
+def _save_settings(settings: dict) -> None:
+    """Atomically overwrite settings.json."""
+    body = json.dumps(settings, indent=2, ensure_ascii=False)
+    tmp_fd, tmp_path = tempfile.mkstemp(dir=SETTINGS_PATH.parent, suffix=".tmp")
     try:
         with os.fdopen(tmp_fd, "w", encoding="utf-8") as fh:
             fh.write(body)
-        os.replace(tmp_path, DISCOUNT_PATH)
+        os.replace(tmp_path, SETTINGS_PATH)
     except Exception:
         with contextlib.suppress(OSError):
             os.unlink(tmp_path)
@@ -410,18 +490,26 @@ def car_auction(car_id: int):
         return jsonify({"error": "Car not found"}), 404
     if not car.get("auctionable"):
         return jsonify({"error": "Car is not auctionable", "auctionable": False}), 200
-    base = car.get("base_value")
-    if not base:
+    if not car.get("base_value"):
         return jsonify({"error": "No base value available", "auctionable": True}), 200
-    tier = AUCTION_TIERS.get(car["rarity"], AUCTION_TIERS["Rare"])
+    settings = load_settings()
+    tiers = settings.get("auction_tiers", DEFAULT_AUCTION_TIERS)
+    tier = tiers.get(car["rarity"], tiers["Rare"])
+    effective_base = _effective_base_value(car, settings)
+    if not effective_base:
+        return jsonify({"error": "No base value available", "auctionable": True}), 200
+
     return jsonify(
         {
             "car_id": car_id,
             "rarity": car["rarity"],
-            "base_value": base,
-            "min_bid": _round_cr(base * tier["min"]),
-            "fair_buyout": _round_cr(base * tier["fair"]),
-            "max_buyout": _round_cr(base * tier["max"]),
+            "base_value": car.get("base_value"),
+            "effective_base_value": _round_cr(effective_base),
+            "discount_applied": bool(settings.get("discount", {}).get("enabled"))
+            and _has_autoshow_source(car),
+            "min_bid": _round_cr(effective_base * tier["min"]),
+            "fair_buyout": _round_cr(effective_base * tier["fair"]),
+            "max_buyout": _round_cr(effective_base * tier["max"]),
             "auctionable": True,
         }
     )
@@ -569,37 +657,62 @@ def get_wishlist():
 
 
 # ---------------------------------------------------------------------------
-# Discount settings — autoshow base value discount helper
+# App settings — pricing and auction configuration
 # ---------------------------------------------------------------------------
 
 
-@app.get("/api/discount")
-def get_discount():
-    with _discount_lock:
-        return jsonify(load_discount())
+@app.get("/api/settings")
+def get_settings():
+    with _settings_lock:
+        return jsonify(load_settings())
 
 
-@app.put("/api/discount")
-def put_discount():
+@app.put("/api/settings")
+def put_settings():
     body = request.get_json(silent=True)
     if body is None:
         return jsonify({"error": "Request body must be JSON"}), 400
 
-    enabled = body.get("enabled")
-    percent = body.get("percent")
-    if not isinstance(enabled, bool):
-        return jsonify({"error": "enabled must be a boolean"}), 422
-    if not isinstance(percent, (int, float)):
-        return jsonify({"error": "percent must be a number"}), 422
-    if not 0 <= float(percent) <= 100:
-        return jsonify({"error": "percent must be between 0 and 100"}), 422
+    discount = body.get("discount")
+    auction_tiers = body.get("auction_tiers")
 
-    discount = {"enabled": enabled, "percent": float(percent)}
-    with _discount_lock:
-        global _discount
-        _discount = discount
-        _save_discount(_discount)
-        return jsonify(_discount)
+    if not isinstance(discount, dict):
+        return jsonify({"error": "discount must be an object"}), 422
+    if not isinstance(auction_tiers, dict):
+        return jsonify({"error": "auction_tiers must be an object"}), 422
+
+    enabled = discount.get("enabled")
+    percent = discount.get("percent")
+    if not isinstance(enabled, bool):
+        return jsonify({"error": "discount.enabled must be a boolean"}), 422
+    if not isinstance(percent, (int, float)):
+        return jsonify({"error": "discount.percent must be a number"}), 422
+    if not 0 <= float(percent) <= 100:
+        return jsonify({"error": "discount.percent must be between 0 and 100"}), 422
+
+    normalized_tiers = _normalize_auction_tiers(auction_tiers)
+    # Strict validation for required rarity keys and min/max sanity.
+    for rarity in DEFAULT_AUCTION_TIERS:
+        incoming = auction_tiers.get(rarity)
+        if not isinstance(incoming, dict):
+            return jsonify({"error": f"auction_tiers.{rarity} must be an object"}), 422
+        min_val = incoming.get("min")
+        max_val = incoming.get("max")
+        if not isinstance(min_val, (int, float)) or not isinstance(max_val, (int, float)):
+            return jsonify({"error": f"auction_tiers.{rarity}.min/max must be numbers"}), 422
+        if float(min_val) <= 0 or float(max_val) <= 0:
+            return jsonify({"error": f"auction_tiers.{rarity}.min/max must be > 0"}), 422
+
+    settings = {
+        "discount": {"enabled": enabled, "percent": float(percent)},
+        "auction_tiers": normalized_tiers,
+    }
+
+    with _settings_lock:
+        global _settings
+        _settings = settings
+        _save_settings(_settings)
+        return jsonify(_settings)
 
 
 @app.post("/api/wishlist/sync")

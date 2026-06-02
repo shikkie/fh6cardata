@@ -84,17 +84,16 @@ function discountedValue(baseValue, percent) {
   return Math.round(n * (1 - (p / 100)))
 }
 
-function bidRange(car) {
+function bidRange(car, appSettings) {
   if (!car.auctionable || !car.base_value) return null
-  const multipliers = {
-    'Common':    [0.5, 1.2],
-    'Rare':      [0.6, 1.4],
-    'Epic':      [0.7, 1.6],
-    'Legendary': [0.8, 2.0],
+  const tiers = appSettings?.auction_tiers || {}
+  const tier = tiers[car.rarity] || tiers.Rare || { min: 0.6, max: 1.8 }
+  let effectiveBase = Number(car.base_value)
+  if (Boolean(appSettings?.discount?.enabled) && hasAutoshow(car.availability)) {
+    effectiveBase = effectiveBase * (1 - (Number(appSettings?.discount?.percent || 0) / 100))
   }
-  const [loMult, hiMult] = multipliers[car.rarity] || [0.6, 1.4]
-  const lo = Math.round(car.base_value * loMult / 1000) * 1000
-  const hi = Math.round(car.base_value * hiMult / 1000) * 1000
+  const lo = Math.round(effectiveBase * Number(tier.min) / 1000) * 1000
+  const hi = Math.round(effectiveBase * Number(tier.max) / 1000) * 1000
   return { lo, hi }
 }
 
@@ -106,12 +105,13 @@ export default function CarDetail({
   onToggleWishlisted,
   onClose,
   onCarUpdate,
-  discountSettings,
+  appSettings,
 }) {
   const ref = useRef(null)
   const [activeTab, setActiveTab] = useState('info')
-  const range = bidRange(car)
+  const range = bidRange(car, appSettings)
   const tags = availTags(car.availability)
+  const discountSettings = appSettings?.discount
   const discountApplies = Boolean(discountSettings?.enabled) && hasAutoshow(car.availability) && Number(car.base_value) > 0
   const autoshowPrice = discountApplies ? discountedValue(car.base_value, discountSettings?.percent) : null
 

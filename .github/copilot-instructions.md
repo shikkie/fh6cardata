@@ -48,6 +48,7 @@ fh6cardata/
 ├── api/main.py          # Single-file Flask app — all routes here
 ├── data/
 │   ├── cars.json        # Car catalogue (loaded once, cached in _cars global)
+│   ├── settings.json    # Pricing settings (discount + auction multipliers)
 │   └── parts.json       # Tuning parts (loaded once, cached in _parts global)
 ├── frontend/src/
 │   ├── App.jsx          # Root: fetch/filter/sort state, owns all API calls
@@ -59,7 +60,7 @@ fh6cardata/
 
 **Data flow:** `App.jsx` fetches `/api/cars` with query params on every filter change (debounced 300 ms for the text query). Owned-car tracking and client-side sorting are applied after the API response — they are never sent to the API. Filter options come from `/api/filters`.
 
-**Auction pricing** is computed server-side in `api/main.py` using `AUCTION_TIERS` multipliers on the car's `base_value`, rounded to the nearest 1,000 CR.
+**Auction pricing** is computed server-side in `api/main.py` using multipliers from `data/settings.json` (`auction_tiers`) on the effective base value (autoshow discount applied first when enabled), rounded to the nearest 1,000 CR.
 
 ## Key Conventions
 
