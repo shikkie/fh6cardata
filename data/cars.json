@@ -2377,7 +2377,8 @@
       "braking": 7.7,
       "offroad": 5.0
     },
-    "image_url": "https://static.wikia.nocookie.net/forzamotorsport/images/d/d8/FH6_Chevrolet_Corvette_Z06_2023.png/revision/latest/scale-to-width-down/320"
+    "image_url": "https://static.wikia.nocookie.net/forzamotorsport/images/d/d8/FH6_Chevrolet_Corvette_Z06_2023.png/revision/latest/scale-to-width-down/320",
+    "carordinalid": 3766
   },
   {
     "id": 101,
@@ -9197,7 +9198,8 @@
       "braking": 4.8,
       "offroad": 5.3
     },
-    "image_url": "https://static.wikia.nocookie.net/forzamotorsport/images/3/32/FH6_Mercedes-AMG_SL_63.png/revision/latest/scale-to-width-down/320"
+    "image_url": "https://static.wikia.nocookie.net/forzamotorsport/images/3/32/FH6_Mercedes-AMG_SL_63.png/revision/latest/scale-to-width-down/320",
+    "carordinalid": 3617
   },
   {
     "id": 391,
@@ -10270,7 +10272,8 @@
       "braking": 5.3,
       "offroad": 5.5
     },
-    "image_url": "https://static.wikia.nocookie.net/forzamotorsport/images/2/24/FH6_Nissan_GT-R_R35.png/revision/latest/scale-to-width-down/320"
+    "image_url": "https://static.wikia.nocookie.net/forzamotorsport/images/2/24/FH6_Nissan_GT-R_R35.png/revision/latest/scale-to-width-down/320",
+    "carordinalid": 2618
   },
   {
     "id": 437,
@@ -13074,7 +13077,8 @@
     },
     "unlock_category": "Horizon Life Events",
     "unlock_points": 3250,
-    "image_url": "https://static.wikia.nocookie.net/forzamotorsport/images/d/d7/FH6_Subaru_Vivio_RX-R.png/revision/latest/scale-to-width-down/320"
+    "image_url": "https://static.wikia.nocookie.net/forzamotorsport/images/d/d7/FH6_Subaru_Vivio_RX-R.png/revision/latest/scale-to-width-down/320",
+    "carordinalid": 4287
   },
   {
     "id": 557,
