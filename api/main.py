@@ -52,11 +52,15 @@ def _load_last_ordinal() -> int | None:
     """Read the persisted last-queried ordinal from disk (survives server restarts)."""
     with contextlib.suppress(Exception):
         if LAST_ORDINAL_PATH.exists():
-            return json.load(LAST_ORDINAL_PATH.open()).get("ordinal_id")
+            raw = json.load(LAST_ORDINAL_PATH.open()).get("ordinal_id")
+            if raw is None:
+                return None
+            if isinstance(raw, int) and raw >= 0:
+                return raw
     return None
 
 
-def _persist_last_ordinal(ordinal_id: int) -> None:
+def _persist_last_ordinal(ordinal_id: int | None) -> None:
     """Atomically write the last-queried ordinal to disk."""
     body = json.dumps({"ordinal_id": ordinal_id})
     tmp_fd, tmp_path = tempfile.mkstemp(dir=LAST_ORDINAL_PATH.parent, suffix=".tmp")
@@ -429,19 +433,22 @@ def get_car_by_ordinal(ordinal_id: int):
     Driving a car in Forza implies ownership, so if the car isn't already in
     the garage it's added automatically with source="telemetry".  The response
     includes a ``garage_updated`` flag so the caller can tell when this happens.
-    Only records the ordinal as the last-queried value on 404 (unmapped ordinals)
-    so the Quick Assign UI always shows the most recent *unassigned* ordinal —
-    mapped-car hits would otherwise overwrite a pending ordinal the user wants to assign.
+    Stores the ordinal as last-queried only on 404 (unmapped ordinals).  A
+    successful mapped lookup clears any previous last-queried value so the
+    Quick Assign UI does not show stale data.
     """
+    global _last_queried_ordinal
     cars = load_cars()
     car = next((c for c in cars if c.get("carordinalid") == ordinal_id), None)
     if car is None:
-        # Only record unmapped ordinals — mapped ones don't need Quick Assign and
-        # would overwrite a pending unmapped ordinal that the user still wants to assign.
-        global _last_queried_ordinal
+        # Record unmapped ordinals for Quick Assign.
         _last_queried_ordinal = ordinal_id
         _persist_last_ordinal(ordinal_id)
         return jsonify({"error": "No car mapped to that ordinal ID"}), 404
+
+    # Mapped lookup means no Quick Assign is needed; clear stale pending ordinal.
+    _last_queried_ordinal = None
+    _persist_last_ordinal(None)
 
     garage_updated = False
     with _garage_lock:

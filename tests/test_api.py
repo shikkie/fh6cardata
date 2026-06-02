@@ -276,7 +276,8 @@ def test_by_ordinal_found(client, first_car_id):
 
 
 def test_by_ordinal_not_found(client):
-    resp = client.get("/api/cars/by-ordinal/1")
+    with patch("api.main._persist_last_ordinal"):
+        resp = client.get("/api/cars/by-ordinal/1")
     assert resp.status_code == 404
 
 
@@ -349,12 +350,8 @@ def test_last_ordinal_assigned(client, first_car_id):
             client.patch(f"/api/cars/{first_car_id}", json={"carordinalid": None})
 
 
-def test_by_ordinal_does_not_record_last_queried_on_success(client, first_car_id):
-    """A successful by-ordinal lookup does NOT update _last_queried_ordinal.
-
-    Mapped cars don't need Quick Assign and would overwrite a pending unmapped
-    ordinal that the user still wants to assign to a different car.
-    """
+def test_by_ordinal_clears_last_queried_on_success(client, first_car_id):
+    """A successful by-ordinal lookup clears stale Quick Assign ordinal state."""
     import api.main as mod
 
     sentinel = 999888777
@@ -365,7 +362,7 @@ def test_by_ordinal_does_not_record_last_queried_on_success(client, first_car_id
         with patch("api.main._save_garage"):
             resp = client.get("/api/cars/by-ordinal/654321")
         assert resp.status_code == 200
-        assert mod._last_queried_ordinal == sentinel  # unchanged
+        assert mod._last_queried_ordinal is None
         # Clean up
         client.patch(f"/api/cars/{first_car_id}", json={"carordinalid": None})
     mod._last_queried_ordinal = original

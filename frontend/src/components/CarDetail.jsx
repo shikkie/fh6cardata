@@ -127,7 +127,10 @@ export default function CarDetail({
   useEffect(() => {
     fetch('/api/telemetry/last-ordinal')
       .then(r => r.ok ? r.json() : null)
-      .then(data => { if (data?.ordinal_id != null) setLastOrdinal(data) })
+      .then(data => {
+        if (data?.ordinal_id != null) setLastOrdinal(data)
+        else setLastOrdinal(null)
+      })
       .catch(() => {})
   }, [])
 
