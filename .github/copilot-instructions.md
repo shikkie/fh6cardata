@@ -82,6 +82,14 @@ fh6cardata/
 - Workbox cache names follow the pattern `fh6-<resource>-api` (e.g. `fh6-cars-api`). The "Refresh Data" button in `App.jsx` deletes all caches matching `fh6-*-api`.
 - ESLint is configured with `--max-warnings 0`; zero warnings are allowed.
 
+### Frontend Theme Guidance
+
+- Keep UI surfaces in the existing dark palette (`--fh6-bg`, `--fh6-surface`, `--fh6-surface2`) and use `--fh6-accent` for primary actions/highlights.
+- Prefer scoped component classes over raw Bootstrap defaults for controls inside custom UI panels/modals; default Bootstrap input colors often clash with theme.
+- Reuse existing typography rhythm: muted helper text should use `--fh6-muted`, primary copy should use `--fh6-text`, and card/panel borders should stay in low-contrast dark grays.
+- Interactive focus states should use the FH6 accent glow pattern (`rgba(240, 165, 0, 0.25)`) for consistency and accessibility.
+- Primary action buttons should be accent/gold; secondary/cancel actions should remain dark/outlined.
+
 ### Car data schema (required fields)
 
 ```
