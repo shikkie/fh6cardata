@@ -6078,7 +6078,8 @@
       "braking": 8.2,
       "offroad": 4.6
     },
-    "image_url": "https://static.wikia.nocookie.net/forzamotorsport/images/4/4d/FH6_Hennessey_Venom_F5.png/revision/latest/scale-to-width-down/320"
+    "image_url": "https://static.wikia.nocookie.net/forzamotorsport/images/4/4d/FH6_Hennessey_Venom_F5.png/revision/latest/scale-to-width-down/320",
+    "carordinalid": 3600
   },
   {
     "id": 257,
@@ -8984,7 +8985,8 @@
       "braking": 8.4,
       "offroad": 5.1
     },
-    "image_url": "https://static.wikia.nocookie.net/forzamotorsport/images/0/06/FH6_McLaren_620R.png/revision/latest/scale-to-width-down/320"
+    "image_url": "https://static.wikia.nocookie.net/forzamotorsport/images/0/06/FH6_McLaren_620R.png/revision/latest/scale-to-width-down/320",
+    "carordinalid": 3655
   },
   {
     "id": 380,
@@ -9217,7 +9219,8 @@
       "braking": 8.4,
       "offroad": 4.7
     },
-    "image_url": "https://static.wikia.nocookie.net/forzamotorsport/images/6/64/FH6_Mercedes-AMG_GT_Black_Series.png/revision/latest/scale-to-width-down/320"
+    "image_url": "https://static.wikia.nocookie.net/forzamotorsport/images/6/64/FH6_Mercedes-AMG_GT_Black_Series.png/revision/latest/scale-to-width-down/320",
+    "carordinalid": 3616
   },
   {
     "id": 390,
@@ -9311,7 +9314,8 @@
       "braking": 4.8,
       "offroad": 5.5
     },
-    "image_url": "https://static.wikia.nocookie.net/forzamotorsport/images/d/df/FH6_Mercedes-AMG_E_63_S.png/revision/latest/scale-to-width-down/320"
+    "image_url": "https://static.wikia.nocookie.net/forzamotorsport/images/d/df/FH6_Mercedes-AMG_E_63_S.png/revision/latest/scale-to-width-down/320",
+    "carordinalid": 3250
   },
   {
     "id": 394,
@@ -10365,7 +10369,8 @@
       "braking": 5.3,
       "offroad": 5.6
     },
-    "image_url": "https://static.wikia.nocookie.net/forzamotorsport/images/1/10/FH6_Nissan_GT-R_Black_Edition_R35.png/revision/latest/scale-to-width-down/320"
+    "image_url": "https://static.wikia.nocookie.net/forzamotorsport/images/1/10/FH6_Nissan_GT-R_Black_Edition_R35.png/revision/latest/scale-to-width-down/320",
+    "carordinalid": 2002
   },
   {
     "id": 439,
@@ -11815,7 +11820,8 @@
       "braking": 8.9,
       "offroad": 5.1
     },
-    "image_url": "https://static.wikia.nocookie.net/forzamotorsport/images/3/3e/FH6_Porsche_911_GT2_RS_2017.png/revision/latest/scale-to-width-down/320"
+    "image_url": "https://static.wikia.nocookie.net/forzamotorsport/images/3/3e/FH6_Porsche_911_GT2_RS_2017.png/revision/latest/scale-to-width-down/320",
+    "carordinalid": 2755
   },
   {
     "id": 501,
@@ -11981,7 +11987,8 @@
       "braking": 5.3,
       "offroad": 5.4
     },
-    "image_url": "https://static.wikia.nocookie.net/forzamotorsport/images/2/25/FH6_Porsche_911_GT3_2004.png/revision/latest/scale-to-width-down/320"
+    "image_url": "https://static.wikia.nocookie.net/forzamotorsport/images/2/25/FH6_Porsche_911_GT3_2004.png/revision/latest/scale-to-width-down/320",
+    "carordinalid": 262
   },
   {
     "id": 508,
