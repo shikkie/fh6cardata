@@ -20,11 +20,6 @@
     "source": "manual"
   },
   {
-    "car_id": 157,
-    "added_at": "2026-05-30T05:31:32Z",
-    "source": "manual"
-  },
-  {
     "car_id": 189,
     "added_at": "2026-05-30T05:31:32Z",
     "source": "manual"
@@ -110,11 +105,6 @@
     "source": "manual"
   },
   {
-    "car_id": 558,
-    "added_at": "2026-05-30T05:31:32Z",
-    "source": "manual"
-  },
-  {
     "car_id": 1,
     "added_at": "2026-05-30T05:32:37Z",
     "source": "telemetry"
@@ -168,11 +158,6 @@
     "car_id": 546,
     "added_at": "2026-05-30T07:50:38Z",
     "source": "telemetry"
-  },
-  {
-    "car_id": 633,
-    "added_at": "2026-05-30T09:03:05Z",
-    "source": "manual"
   },
   {
     "car_id": 306,
@@ -252,11 +237,6 @@
   {
     "car_id": 517,
     "added_at": "2026-05-30T09:05:07Z",
-    "source": "manual"
-  },
-  {
-    "car_id": 223,
-    "added_at": "2026-05-30T09:05:09Z",
     "source": "manual"
   },
   {
@@ -887,6 +867,736 @@
   {
     "car_id": 141,
     "added_at": "2026-06-02T02:23:28Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 383,
+    "added_at": "2026-06-02T02:41:33Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 18,
+    "added_at": "2026-06-02T03:42:46Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 83,
+    "added_at": "2026-06-02T03:46:07Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 86,
+    "added_at": "2026-06-02T03:47:59Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 191,
+    "added_at": "2026-06-02T03:49:27Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 194,
+    "added_at": "2026-06-02T03:49:54Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 360,
+    "added_at": "2026-06-02T03:50:55Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 365,
+    "added_at": "2026-06-02T03:51:31Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 361,
+    "added_at": "2026-06-02T03:51:55Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 374,
+    "added_at": "2026-06-02T03:52:20Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 370,
+    "added_at": "2026-06-02T03:53:11Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 367,
+    "added_at": "2026-06-02T03:54:55Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 216,
+    "added_at": "2026-06-02T03:56:00Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 232,
+    "added_at": "2026-06-02T03:56:59Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 215,
+    "added_at": "2026-06-02T03:57:39Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 229,
+    "added_at": "2026-06-02T03:58:13Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 225,
+    "added_at": "2026-06-02T03:58:36Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 211,
+    "added_at": "2026-06-02T03:59:01Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 207,
+    "added_at": "2026-06-02T03:59:53Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 204,
+    "added_at": "2026-06-02T04:00:24Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 193,
+    "added_at": "2026-06-02T04:00:54Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 230,
+    "added_at": "2026-06-02T04:01:48Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 228,
+    "added_at": "2026-06-02T04:02:42Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 195,
+    "added_at": "2026-06-02T04:03:04Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 200,
+    "added_at": "2026-06-02T04:03:54Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 188,
+    "added_at": "2026-06-02T04:04:24Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 100,
+    "added_at": "2026-06-02T06:27:33Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 436,
+    "added_at": "2026-06-02T06:29:16Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 556,
+    "added_at": "2026-06-02T06:31:05Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 390,
+    "added_at": "2026-06-02T06:35:12Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 223,
+    "added_at": "2026-06-02T07:49:22Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 109,
+    "added_at": "2026-06-03T04:26:14Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 74,
+    "added_at": "2026-06-03T04:26:41Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 231,
+    "added_at": "2026-06-03T04:28:01Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 519,
+    "added_at": "2026-06-03T04:30:07Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 114,
+    "added_at": "2026-06-03T04:32:24Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 565,
+    "added_at": "2026-06-03T04:32:44Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 278,
+    "added_at": "2026-06-03T04:56:28Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 208,
+    "added_at": "2026-06-03T04:57:31Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 243,
+    "added_at": "2026-06-03T05:00:33Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 285,
+    "added_at": "2026-06-03T05:02:46Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 303,
+    "added_at": "2026-06-03T05:03:20Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 506,
+    "added_at": "2026-06-03T05:06:15Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 117,
+    "added_at": "2026-06-03T05:06:59Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 105,
+    "added_at": "2026-06-03T05:08:13Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 107,
+    "added_at": "2026-06-03T05:08:31Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 359,
+    "added_at": "2026-06-04T03:50:56Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 443,
+    "added_at": "2026-06-04T03:51:20Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 326,
+    "added_at": "2026-06-04T04:16:00Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 407,
+    "added_at": "2026-06-04T04:23:45Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 239,
+    "added_at": "2026-06-04T04:31:24Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 440,
+    "added_at": "2026-06-04T04:32:26Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 247,
+    "added_at": "2026-06-04T04:36:04Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 323,
+    "added_at": "2026-06-04T05:48:11Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 354,
+    "added_at": "2026-06-04T05:48:45Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 352,
+    "added_at": "2026-06-07T15:52:10Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 422,
+    "added_at": "2026-06-07T16:32:21Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 423,
+    "added_at": "2026-06-07T16:32:54Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 547,
+    "added_at": "2026-06-07T21:42:41Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 553,
+    "added_at": "2026-06-07T21:43:32Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 551,
+    "added_at": "2026-06-07T21:44:08Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 549,
+    "added_at": "2026-06-07T21:44:34Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 545,
+    "added_at": "2026-06-07T21:45:09Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 121,
+    "added_at": "2026-06-07T22:01:36Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 101,
+    "added_at": "2026-06-07T22:02:02Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 612,
+    "added_at": "2026-06-08T00:02:14Z",
+    "source": "telemetry"
+  },
+  {
+    "car_id": 134,
+    "added_at": "2026-06-08T00:03:17Z",
+    "source": "telemetry"
+  },
+  {
+    "car_id": 582,
+    "added_at": "2026-06-08T04:25:27Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 437,
+    "added_at": "2026-06-09T01:47:27Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 67,
+    "added_at": "2026-06-10T00:33:05Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 69,
+    "added_at": "2026-06-10T00:33:34Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 68,
+    "added_at": "2026-06-10T00:33:50Z",
+    "source": "telemetry"
+  },
+  {
+    "car_id": 70,
+    "added_at": "2026-06-10T00:34:24Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 289,
+    "added_at": "2026-06-10T00:35:29Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 288,
+    "added_at": "2026-06-10T00:35:48Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 290,
+    "added_at": "2026-06-10T00:36:14Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 291,
+    "added_at": "2026-06-10T00:36:32Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 292,
+    "added_at": "2026-06-10T00:36:55Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 235,
+    "added_at": "2026-06-10T03:49:22Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 125,
+    "added_at": "2026-06-10T03:49:42Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 124,
+    "added_at": "2026-06-10T03:50:43Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 123,
+    "added_at": "2026-06-10T03:51:28Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 477,
+    "added_at": "2026-06-10T03:52:16Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 186,
+    "added_at": "2026-06-10T03:52:53Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 613,
+    "added_at": "2026-06-10T03:53:43Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 122,
+    "added_at": "2026-06-10T03:54:08Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 234,
+    "added_at": "2026-06-10T03:54:59Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 595,
+    "added_at": "2026-06-10T03:55:19Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 594,
+    "added_at": "2026-06-10T03:55:33Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 335,
+    "added_at": "2026-06-10T03:56:09Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 529,
+    "added_at": "2026-06-10T03:56:32Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 418,
+    "added_at": "2026-06-10T03:57:27Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 120,
+    "added_at": "2026-06-10T03:58:38Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 129,
+    "added_at": "2026-06-10T03:58:56Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 147,
+    "added_at": "2026-06-10T03:59:18Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 470,
+    "added_at": "2026-06-10T03:59:43Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 611,
+    "added_at": "2026-06-10T04:00:20Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 233,
+    "added_at": "2026-06-10T04:13:04Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 168,
+    "added_at": "2026-06-10T04:14:04Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 343,
+    "added_at": "2026-06-10T05:13:07Z",
+    "source": "telemetry"
+  },
+  {
+    "car_id": 379,
+    "added_at": "2026-06-10T05:46:56Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 438,
+    "added_at": "2026-06-10T05:55:14Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 256,
+    "added_at": "2026-06-10T05:55:40Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 500,
+    "added_at": "2026-06-10T05:56:12Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 389,
+    "added_at": "2026-06-10T05:57:11Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 507,
+    "added_at": "2026-06-10T05:57:54Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 393,
+    "added_at": "2026-06-10T05:58:32Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 137,
+    "added_at": "2026-06-10T19:59:23Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 210,
+    "added_at": "2026-06-10T20:00:18Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 516,
+    "added_at": "2026-06-10T20:01:12Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 260,
+    "added_at": "2026-06-10T20:02:00Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 79,
+    "added_at": "2026-06-10T20:02:33Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 435,
+    "added_at": "2026-06-10T20:03:06Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 373,
+    "added_at": "2026-06-10T20:03:31Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 263,
+    "added_at": "2026-06-10T20:03:52Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 277,
+    "added_at": "2026-06-10T20:04:40Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 564,
+    "added_at": "2026-06-10T20:05:10Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 524,
+    "added_at": "2026-06-10T20:05:31Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 419,
+    "added_at": "2026-06-10T20:05:55Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 576,
+    "added_at": "2026-06-10T20:06:48Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 358,
+    "added_at": "2026-06-10T20:07:05Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 362,
+    "added_at": "2026-06-10T20:07:28Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 271,
+    "added_at": "2026-06-10T20:07:57Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 425,
+    "added_at": "2026-06-10T20:08:21Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 270,
+    "added_at": "2026-06-10T20:08:56Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 222,
+    "added_at": "2026-06-10T20:09:39Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 450,
+    "added_at": "2026-06-10T20:10:04Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 428,
+    "added_at": "2026-06-10T20:10:45Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 273,
+    "added_at": "2026-06-10T20:11:30Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 460,
+    "added_at": "2026-06-10T20:23:26Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 317,
+    "added_at": "2026-06-10T20:24:23Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 138,
+    "added_at": "2026-06-10T20:24:45Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 241,
+    "added_at": "2026-06-10T20:25:25Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 197,
+    "added_at": "2026-06-10T20:27:11Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 406,
+    "added_at": "2026-06-10T20:27:35Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 492,
+    "added_at": "2026-06-10T20:27:59Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 394,
+    "added_at": "2026-06-10T20:28:27Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 532,
+    "added_at": "2026-06-10T20:29:38Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 61,
+    "added_at": "2026-06-10T20:30:06Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 578,
+    "added_at": "2026-06-10T20:31:02Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 146,
+    "added_at": "2026-06-10T20:31:59Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 627,
+    "added_at": "2026-06-10T20:33:54Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 75,
+    "added_at": "2026-06-10T20:36:15Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 65,
+    "added_at": "2026-06-10T20:36:41Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 82,
+    "added_at": "2026-06-10T20:37:00Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 84,
+    "added_at": "2026-06-10T20:37:21Z",
     "source": "manual"
   }
 ]
