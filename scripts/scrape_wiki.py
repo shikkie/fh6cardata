@@ -101,6 +101,7 @@ COUNTRY_MAP: dict[str, str] = {
     "nor": "Norway",
     "can": "Canada",
     "bra": "Brazil",
+    "ch": "China",
 }
 
 

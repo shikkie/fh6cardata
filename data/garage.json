@@ -1598,5 +1598,20 @@
     "car_id": 84,
     "added_at": "2026-06-10T20:37:21Z",
     "source": "manual"
+  },
+  {
+    "car_id": 157,
+    "added_at": "2026-06-11T04:48:53Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 558,
+    "added_at": "2026-06-11T04:48:53Z",
+    "source": "manual"
+  },
+  {
+    "car_id": 633,
+    "added_at": "2026-06-11T04:48:53Z",
+    "source": "manual"
   }
 ]
