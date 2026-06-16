@@ -792,8 +792,8 @@
     "id": 34,
     "year": 2023,
     "manufacturer": "Audi",
-    "model": "R8 Coup\u00e9 V10 GT RWD",
-    "full_name": "2023 Audi R8 Coup\u00e9 V10 GT RWD",
+    "model": "R8 Coupé V10 GT RWD",
+    "full_name": "2023 Audi R8 Coupé V10 GT RWD",
     "rarity": "Epic",
     "pi_class": "A",
     "pi": 769,
@@ -1031,8 +1031,8 @@
     "id": 44,
     "year": 2013,
     "manufacturer": "Audi",
-    "model": "R8 Coup\u00e9 V10 plus 5.2 FSI quattro",
-    "full_name": "2013 Audi R8 Coup\u00e9 V10 plus 5.2 FSI quattro",
+    "model": "R8 Coupé V10 plus 5.2 FSI quattro",
+    "full_name": "2013 Audi R8 Coupé V10 plus 5.2 FSI quattro",
     "rarity": "Epic",
     "pi_class": "B",
     "pi": 694,
@@ -1105,8 +1105,8 @@
     "id": 47,
     "year": 2011,
     "manufacturer": "Audi",
-    "model": "RS 5 Coup\u00e9",
-    "full_name": "2011 Audi RS 5 Coup\u00e9",
+    "model": "RS 5 Coupé",
+    "full_name": "2011 Audi RS 5 Coupé",
     "rarity": "Rare",
     "pi_class": "B",
     "pi": 613,
@@ -1153,8 +1153,8 @@
     "id": 49,
     "year": 2010,
     "manufacturer": "Audi",
-    "model": "TT RS Coup\u00e9",
-    "full_name": "2010 Audi TT RS Coup\u00e9",
+    "model": "TT RS Coupé",
+    "full_name": "2010 Audi TT RS Coupé",
     "rarity": "Rare",
     "pi_class": "C",
     "pi": 593,
@@ -1338,7 +1338,8 @@
       "braking": 4.0,
       "offroad": 6.0
     },
-    "image_url": "https://static.wikia.nocookie.net/forzamotorsport/images/2/28/FH6_Audi_Sport_quattro.png/revision/latest/scale-to-width-down/320"
+    "image_url": "https://static.wikia.nocookie.net/forzamotorsport/images/2/28/FH6_Audi_Sport_quattro.png/revision/latest/scale-to-width-down/320",
+    "carordinalid": 633
   },
   {
     "id": 57,
@@ -1587,8 +1588,8 @@
     "id": 67,
     "year": 2021,
     "manufacturer": "BMW",
-    "model": "M4 Competition Coup\u00e9",
-    "full_name": "2021 BMW M4 Competition Coup\u00e9",
+    "model": "M4 Competition Coupé",
+    "full_name": "2021 BMW M4 Competition Coupé",
     "rarity": "Legendary",
     "pi_class": "A",
     "pi": 800,
@@ -1611,8 +1612,8 @@
     "id": 68,
     "year": 2021,
     "manufacturer": "BMW",
-    "model": "M4 Competition Coup\u00e9",
-    "full_name": "2021 BMW M4 Competition Coup\u00e9",
+    "model": "M4 Competition Coupé",
+    "full_name": "2021 BMW M4 Competition Coupé",
     "rarity": "Rare",
     "pi_class": "B",
     "pi": 666,
@@ -1635,8 +1636,8 @@
     "id": 69,
     "year": 2020,
     "manufacturer": "BMW",
-    "model": "M8 Competition Coup\u00e9",
-    "full_name": "2020 BMW M8 Competition Coup\u00e9",
+    "model": "M8 Competition Coupé",
+    "full_name": "2020 BMW M8 Competition Coupé",
     "rarity": "Rare",
     "pi_class": "B",
     "pi": 684,
@@ -1659,8 +1660,8 @@
     "id": 70,
     "year": 2020,
     "manufacturer": "BMW",
-    "model": "M2 Competition Coup\u00e9",
-    "full_name": "2020 BMW M2 Competition Coup\u00e9",
+    "model": "M2 Competition Coupé",
+    "full_name": "2020 BMW M2 Competition Coupé",
     "rarity": "Epic",
     "pi_class": "B",
     "pi": 656,
@@ -1756,8 +1757,8 @@
     "id": 74,
     "year": 2014,
     "manufacturer": "BMW",
-    "model": "M4 Coup\u00e9",
-    "full_name": "2014 BMW M4 Coup\u00e9",
+    "model": "M4 Coupé",
+    "full_name": "2014 BMW M4 Coupé",
     "rarity": "Rare",
     "pi_class": "B",
     "pi": 679,
@@ -1899,8 +1900,8 @@
     "id": 80,
     "year": 2008,
     "manufacturer": "BMW",
-    "model": "Z4 M Coup\u00e9",
-    "full_name": "2008 BMW Z4 M Coup\u00e9",
+    "model": "Z4 M Coupé",
+    "full_name": "2008 BMW Z4 M Coupé",
     "rarity": "Rare",
     "pi_class": "C",
     "pi": 579,
@@ -1916,7 +1917,8 @@
       "braking": 4.3,
       "offroad": 5.6
     },
-    "image_url": "https://static.wikia.nocookie.net/forzamotorsport/images/8/89/FH6_BMW_Z4_M_Coupe.png/revision/latest/scale-to-width-down/320"
+    "image_url": "https://static.wikia.nocookie.net/forzamotorsport/images/8/89/FH6_BMW_Z4_M_Coupe.png/revision/latest/scale-to-width-down/320",
+    "carordinalid": 1059
   },
   {
     "id": 81,
@@ -3712,7 +3714,8 @@
       "braking": 7.1,
       "offroad": 4.3
     },
-    "image_url": "https://static.wikia.nocookie.net/forzamotorsport/images/4/44/FH6_Ferrari_Monza_SP2.png/revision/latest/scale-to-width-down/320"
+    "image_url": "https://static.wikia.nocookie.net/forzamotorsport/images/4/44/FH6_Ferrari_Monza_SP2.png/revision/latest/scale-to-width-down/320",
+    "carordinalid": 3312
   },
   {
     "id": 157,
@@ -3759,7 +3762,8 @@
       "braking": 10.0,
       "offroad": 4.6
     },
-    "image_url": "https://static.wikia.nocookie.net/forzamotorsport/images/b/b8/FH6_Ferrari_FXX-K_Evo.png/revision/latest/scale-to-width-down/320"
+    "image_url": "https://static.wikia.nocookie.net/forzamotorsport/images/b/b8/FH6_Ferrari_FXX-K_Evo.png/revision/latest/scale-to-width-down/320",
+    "carordinalid": 3311
   },
   {
     "id": 159,
@@ -3854,7 +3858,8 @@
       "braking": 7.2,
       "offroad": 4.7
     },
-    "image_url": "https://static.wikia.nocookie.net/forzamotorsport/images/9/91/FH6_Ferrari_J50.png/revision/latest/scale-to-width-down/320"
+    "image_url": "https://static.wikia.nocookie.net/forzamotorsport/images/9/91/FH6_Ferrari_J50.png/revision/latest/scale-to-width-down/320",
+    "carordinalid": 3226
   },
   {
     "id": 163,
@@ -4017,7 +4022,8 @@
       "braking": 9.1,
       "offroad": 4.1
     },
-    "image_url": "https://static.wikia.nocookie.net/forzamotorsport/images/3/34/FH6_Ferrari_599XX.png/revision/latest/scale-to-width-down/320"
+    "image_url": "https://static.wikia.nocookie.net/forzamotorsport/images/3/34/FH6_Ferrari_599XX.png/revision/latest/scale-to-width-down/320",
+    "carordinalid": 1171
   },
   {
     "id": 170,
@@ -4110,7 +4116,8 @@
       "braking": 7.9,
       "offroad": 5.2
     },
-    "image_url": "https://static.wikia.nocookie.net/forzamotorsport/images/2/22/FH6_Ferrari_Enzo.png/revision/latest/scale-to-width-down/320"
+    "image_url": "https://static.wikia.nocookie.net/forzamotorsport/images/2/22/FH6_Ferrari_Enzo.png/revision/latest/scale-to-width-down/320",
+    "carordinalid": 333
   },
   {
     "id": 174,
@@ -7473,8 +7480,8 @@
     "id": 315,
     "year": 2023,
     "manufacturer": "Lamborghini",
-    "model": "Hurac\u00e1n Sterrato",
-    "full_name": "2023 Lamborghini Hurac\u00e1n Sterrato",
+    "model": "Huracán Sterrato",
+    "full_name": "2023 Lamborghini Huracán Sterrato",
     "rarity": "Legendary",
     "pi_class": "A",
     "pi": 738,
@@ -7498,8 +7505,8 @@
     "id": 316,
     "year": 2022,
     "manufacturer": "Lamborghini",
-    "model": "Hurac\u00e1n Tecnica",
-    "full_name": "2022 Lamborghini Hurac\u00e1n Tecnica",
+    "model": "Huracán Tecnica",
+    "full_name": "2022 Lamborghini Huracán Tecnica",
     "rarity": "Legendary",
     "pi_class": "A",
     "pi": 747,
@@ -7586,14 +7593,15 @@
       "braking": 10.0,
       "offroad": 5.2
     },
-    "image_url": "https://static.wikia.nocookie.net/forzamotorsport/images/4/4a/FH6_Lamborghini_Essenza_SCV12.png/revision/latest/scale-to-width-down/320"
+    "image_url": "https://static.wikia.nocookie.net/forzamotorsport/images/4/4a/FH6_Lamborghini_Essenza_SCV12.png/revision/latest/scale-to-width-down/320",
+    "carordinalid": 3606
   },
   {
     "id": 320,
     "year": 2020,
     "manufacturer": "Lamborghini",
-    "model": "Si\u00e1n Roadster",
-    "full_name": "2020 Lamborghini Si\u00e1n Roadster",
+    "model": "Sián Roadster",
+    "full_name": "2020 Lamborghini Sián Roadster",
     "rarity": "Legendary",
     "pi_class": "A",
     "pi": 797,
@@ -7615,8 +7623,8 @@
     "id": 321,
     "year": 2020,
     "manufacturer": "Lamborghini",
-    "model": "Hurac\u00e1n STO",
-    "full_name": "2020 Lamborghini Hurac\u00e1n STO",
+    "model": "Huracán STO",
+    "full_name": "2020 Lamborghini Huracán STO",
     "rarity": "Legendary",
     "pi_class": "A",
     "pi": 783,
@@ -7638,8 +7646,8 @@
     "id": 322,
     "year": 2020,
     "manufacturer": "Lamborghini",
-    "model": "Hurac\u00e1n EVO",
-    "full_name": "2020 Lamborghini Hurac\u00e1n EVO",
+    "model": "Huracán EVO",
+    "full_name": "2020 Lamborghini Huracán EVO",
     "rarity": "Epic",
     "pi_class": "A",
     "pi": 761,
@@ -7735,8 +7743,8 @@
     "id": 326,
     "year": 2014,
     "manufacturer": "Lamborghini",
-    "model": "Hurac\u00e1n LP 610-4",
-    "full_name": "2014 Lamborghini Hurac\u00e1n LP 610-4",
+    "model": "Huracán LP 610-4",
+    "full_name": "2014 Lamborghini Huracán LP 610-4",
     "rarity": "Epic",
     "pi_class": "A",
     "pi": 738,
@@ -7851,8 +7859,8 @@
     "id": 331,
     "year": 2010,
     "manufacturer": "Lamborghini",
-    "model": "Murci\u00e9lago LP 670-4 SV",
-    "full_name": "2010 Lamborghini Murci\u00e9lago LP 670-4 SV",
+    "model": "Murciélago LP 670-4 SV",
+    "full_name": "2010 Lamborghini Murciélago LP 670-4 SV",
     "rarity": "Epic",
     "pi_class": "A",
     "pi": 707,
@@ -7891,7 +7899,8 @@
       "braking": 7.9,
       "offroad": 4.6
     },
-    "image_url": "https://static.wikia.nocookie.net/forzamotorsport/images/6/65/FH6_Lamborghini_Diablo_GTR.png/revision/latest/scale-to-width-down/320"
+    "image_url": "https://static.wikia.nocookie.net/forzamotorsport/images/6/65/FH6_Lamborghini_Diablo_GTR.png/revision/latest/scale-to-width-down/320",
+    "carordinalid": 324
   },
   {
     "id": 333,
@@ -8948,8 +8957,8 @@
     "id": 377,
     "year": 2021,
     "manufacturer": "McLaren",
-    "model": "765LT Coup\u00e9",
-    "full_name": "2021 McLaren 765LT Coup\u00e9",
+    "model": "765LT Coupé",
+    "full_name": "2021 McLaren 765LT Coupé",
     "rarity": "Epic",
     "pi_class": "S1",
     "pi": 829,
@@ -9042,8 +9051,8 @@
     "id": 381,
     "year": 2018,
     "manufacturer": "McLaren",
-    "model": "600LT Coup\u00e9",
-    "full_name": "2018 McLaren 600LT Coup\u00e9",
+    "model": "600LT Coupé",
+    "full_name": "2018 McLaren 600LT Coupé",
     "rarity": "Epic",
     "pi_class": "A",
     "pi": 780,
@@ -9065,8 +9074,8 @@
     "id": 382,
     "year": 2015,
     "manufacturer": "McLaren",
-    "model": "570S Coup\u00e9",
-    "full_name": "2015 McLaren 570S Coup\u00e9",
+    "model": "570S Coupé",
+    "full_name": "2015 McLaren 570S Coupé",
     "rarity": "Epic",
     "pi_class": "A",
     "pi": 721,
@@ -9136,8 +9145,8 @@
     "id": 385,
     "year": 2011,
     "manufacturer": "McLaren",
-    "model": "12C Coup\u00e9",
-    "full_name": "2011 McLaren 12C Coup\u00e9",
+    "model": "12C Coupé",
+    "full_name": "2011 McLaren 12C Coupé",
     "rarity": "Epic",
     "pi_class": "A",
     "pi": 727,
@@ -9348,8 +9357,8 @@
     "id": 394,
     "year": 2018,
     "manufacturer": "Mercedes-AMG",
-    "model": "GT 4-Door Coup\u00e9",
-    "full_name": "2018 Mercedes-AMG GT 4-Door Coup\u00e9",
+    "model": "GT 4-Door Coupé",
+    "full_name": "2018 Mercedes-AMG GT 4-Door Coupé",
     "rarity": "Epic",
     "pi_class": "B",
     "pi": 664,
@@ -9395,8 +9404,8 @@
     "id": 396,
     "year": 2016,
     "manufacturer": "Mercedes-AMG",
-    "model": "C 63 S Coup\u00e9",
-    "full_name": "2016 Mercedes-AMG C 63 S Coup\u00e9",
+    "model": "C 63 S Coupé",
+    "full_name": "2016 Mercedes-AMG C 63 S Coupé",
     "rarity": "Rare",
     "pi_class": "B",
     "pi": 645,
@@ -9559,8 +9568,8 @@
     "id": 403,
     "year": 2012,
     "manufacturer": "Mercedes-Benz",
-    "model": "C 63 AMG Coup\u00e9 Black Series",
-    "full_name": "2012 Mercedes-Benz C 63 AMG Coup\u00e9 Black Series",
+    "model": "C 63 AMG Coupé Black Series",
+    "full_name": "2012 Mercedes-Benz C 63 AMG Coupé Black Series",
     "rarity": "Epic",
     "pi_class": "B",
     "pi": 654,
@@ -9722,8 +9731,8 @@
     "id": 410,
     "year": 1954,
     "manufacturer": "Mercedes-Benz",
-    "model": "300 SL Coup\u00e9",
-    "full_name": "1954 Mercedes-Benz 300 SL Coup\u00e9",
+    "model": "300 SL Coupé",
+    "full_name": "1954 Mercedes-Benz 300 SL Coupé",
     "rarity": "Legendary",
     "pi_class": "D",
     "pi": 388,
@@ -11962,7 +11971,8 @@
     },
     "unlock_category": "Horizon Play",
     "unlock_points": 3700,
-    "image_url": "https://static.wikia.nocookie.net/forzamotorsport/images/d/de/FH6_Porsche_918_Spyder.png/revision/latest/scale-to-width-down/320"
+    "image_url": "https://static.wikia.nocookie.net/forzamotorsport/images/d/de/FH6_Porsche_918_Spyder.png/revision/latest/scale-to-width-down/320",
+    "carordinalid": 2290
   },
   {
     "id": 505,
@@ -12464,8 +12474,8 @@
     "id": 526,
     "year": 2008,
     "manufacturer": "Renault",
-    "model": "M\u00e9gane R26.R",
-    "full_name": "2008 Renault M\u00e9gane R26.R",
+    "model": "Mégane R26.R",
+    "full_name": "2008 Renault Mégane R26.R",
     "rarity": "Rare",
     "pi_class": "C",
     "pi": 561,
@@ -13701,7 +13711,8 @@
     },
     "unlock_category": "Photography",
     "unlock_points": 2000,
-    "image_url": "https://static.wikia.nocookie.net/forzamotorsport/images/0/03/FH6_Toyota_Chaser_2.5_Tourer_V.png/revision/latest/scale-to-width-down/320"
+    "image_url": "https://static.wikia.nocookie.net/forzamotorsport/images/0/03/FH6_Toyota_Chaser_2.5_Tourer_V.png/revision/latest/scale-to-width-down/320",
+    "carordinalid": 3933
   },
   {
     "id": 578,
@@ -14385,7 +14396,8 @@
       "braking": 2.8,
       "offroad": 5.3
     },
-    "image_url": "https://static.wikia.nocookie.net/forzamotorsport/images/7/71/FH6_Volkswagen_Corrado_VR6.png/revision/latest/scale-to-width-down/320"
+    "image_url": "https://static.wikia.nocookie.net/forzamotorsport/images/7/71/FH6_Volkswagen_Corrado_VR6.png/revision/latest/scale-to-width-down/320",
+    "carordinalid": 309
   },
   {
     "id": 607,
@@ -14587,7 +14599,7 @@
     "pi_class": "D",
     "pi": 100,
     "availability": "Autoshow / Aftermarket",
-    "country": "China",
+    "country": "ch",
     "base_value": 5000,
     "auctionable": true,
     "stats": {
@@ -14611,7 +14623,7 @@
     "pi_class": "A",
     "pi": 800,
     "availability": "Wheelspin",
-    "country": "China",
+    "country": "ch",
     "base_value": 500000,
     "auctionable": false,
     "stats": {
@@ -14634,7 +14646,7 @@
     "pi_class": "D",
     "pi": 107,
     "availability": "Autoshow",
-    "country": "China",
+    "country": "ch",
     "base_value": 2000,
     "auctionable": true,
     "stats": {
@@ -14669,7 +14681,8 @@
       "braking": 10.0,
       "offroad": 4.8
     },
-    "image_url": "https://static.wikia.nocookie.net/forzamotorsport/images/b/bc/FH6_Zenvo_TSR-S.png/revision/latest/scale-to-width-down/320"
+    "image_url": "https://static.wikia.nocookie.net/forzamotorsport/images/b/bc/FH6_Zenvo_TSR-S.png/revision/latest/scale-to-width-down/320",
+    "carordinalid": 3212
   },
   {
     "id": 619,
@@ -14907,8 +14920,8 @@
     "id": 629,
     "year": 2019,
     "manufacturer": "Lamborghini",
-    "model": "Si\u00e1n FKP 37",
-    "full_name": "2019 Lamborghini Si\u00e1n FKP 37",
+    "model": "Sián FKP 37",
+    "full_name": "2019 Lamborghini Sián FKP 37",
     "rarity": "Legendary",
     "pi_class": "R",
     "pi": 992,
@@ -15045,8 +15058,8 @@
     "id": 635,
     "year": 2022,
     "manufacturer": "Lamborghini",
-    "model": "Hurac\u00e1n Super Trofeo EVO2",
-    "full_name": "2022 Lamborghini Hurac\u00e1n Super Trofeo EVO2",
+    "model": "Huracán Super Trofeo EVO2",
+    "full_name": "2022 Lamborghini Huracán Super Trofeo EVO2",
     "rarity": "Epic",
     "pi_class": "R",
     "pi": 986,
@@ -15245,95 +15258,5 @@
       "offroad": 4.7
     },
     "image_url": "https://static.wikia.nocookie.net/forzamotorsport/images/9/93/FH6_Dodge_Viper_ACR.png/revision/latest/scale-to-width-down/320"
-  },
-  {
-    "id": 644,
-    "year": 1972,
-    "manufacturer": "Datsun",
-    "model": "269 Attacking the Clock Racing 240Z 'All Carbon Hill Climb Beast'",
-    "full_name": "1972 Datsun 269 Attacking the Clock Racing 240Z 'All Carbon Hill Climb Beast'",
-    "rarity": "Epic",
-    "pi_class": "S2",
-    "pi": 951,
-    "availability": "Car Pass",
-    "country": "Japan",
-    "base_value": 185000,
-    "auctionable": true,
-    "stats": {
-      "speed": 6.4,
-      "handling": 9.1,
-      "acceleration": 7.1,
-      "launch": 7.5,
-      "braking": 10.0,
-      "offroad": 4.2
-    }
-  },
-  {
-    "id": 645,
-    "year": 2018,
-    "manufacturer": "DeBerti Design",
-    "model": "DeBerti Jeep Wrangler Unlimited",
-    "full_name": "2018 DeBerti Design DeBerti Jeep Wrangler Unlimited",
-    "rarity": "Epic",
-    "pi_class": "B",
-    "pi": 645,
-    "availability": "Autoshow",
-    "country": "USA",
-    "base_value": 150000,
-    "auctionable": true,
-    "stats": {
-      "speed": 4.7,
-      "handling": 3.9,
-      "acceleration": 6.3,
-      "launch": 4.8,
-      "braking": 4.4,
-      "offroad": 9.4
-    }
-  },
-  {
-    "id": 646,
-    "year": 1985,
-    "manufacturer": "Toyota",
-    "model": "Sprinter Trueno GT-APEX",
-    "full_name": "1985 Toyota Sprinter Trueno GT-APEX",
-    "rarity": "Forza Edition",
-    "pi_class": "C",
-    "pi": 600,
-    "availability": "Horizon Promo",
-    "country": "Japan",
-    "base_value": 500000,
-    "auctionable": false,
-    "stats": {
-      "speed": 5.0,
-      "handling": 5.8,
-      "acceleration": 4.5,
-      "launch": 4.6,
-      "braking": 5.5,
-      "offroad": 4.4
-    },
-    "unlock_category": "Master Explorer",
-    "unlock_points": 5000
-  },
-  {
-    "id": 647,
-    "year": 2020,
-    "manufacturer": "Wuling",
-    "model": "Sunshine S",
-    "full_name": "2020 Wuling Sunshine S",
-    "rarity": "Forza Edition",
-    "pi_class": "A",
-    "pi": 800,
-    "availability": "Wheelspin",
-    "country": "China",
-    "base_value": 500000,
-    "auctionable": false,
-    "stats": {
-      "speed": 7.1,
-      "handling": 7.5,
-      "acceleration": 5.9,
-      "launch": 6.2,
-      "braking": 7.7,
-      "offroad": 5.3
-    }
   }
 ]
